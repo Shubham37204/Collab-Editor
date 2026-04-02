@@ -1,36 +1,134 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# 🚀 Collab Editor — Real-Time Document Collaboration Platform
 
-## Getting Started
+A modern **real-time collaborative document editor** built with **Next.js, Convex, and React**, enabling users to create, edit, share, and manage documents seamlessly.
 
-First, run the development server:
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## ✨ Features
+
+* 📝 Create and manage documents
+* ⚡ Real-time updates using Convex
+* 👥 Collaborator support (viewer/editor roles)
+* ⭐ Star / favorite important documents
+* 🔔 Notification system for collaboration events
+* 🕒 Version history tracking
+* 🌐 Public & private document access
+* 🎯 Clean and responsive UI
+
+
+## 🛠️ Tech Stack
+
+* **Frontend:** Next.js (App Router), React
+* **Backend:** Convex (serverless database + functions)
+* **State Management:** Convex reactive queries
+* **Styling:** Tailwind CSS
+* **Authentication:** Clerk (if used)
+
+
+## 📁 Project Structure
+
+```
+app/            # Next.js routes
+components/     # Reusable UI components
+convex/         # Backend (queries, mutations, schema)
+lib/            # Utility functions
+public/         # Static assets
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## ⚙️ Setup & Installation
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1️⃣ Clone the repository
 
-## Learn More
+```
+git clone https://github.com/your-username/collab-editor.git
+cd collab-editor
+```
 
-To learn more about Next.js, take a look at the following resources:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2️⃣ Install dependencies
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+npm install
+```
 
-## Deploy on Vercel
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 3️⃣ Setup environment variables
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Create a `.env.local` file:
+
+```
+# Deployment used by `npx convex dev`
+CONVEX_DEPLOYMENT=
+NEXT_PUBLIC_CONVEX_URL=
+NEXT_PUBLIC_CONVEX_SITE_URL=
+
+
+# Get these from clerk.com → Create app → API Keys
+NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
+CLERK_SECRET_KEY=
+
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=
+
+
+NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY=
+LIVEBLOCKS_SECRET_KEY=
+
+GROQ_API_KEY=
+
+```
+
+
+### 4️⃣ Run Convex backend
+
+```
+npx convex dev
+```
+
+
+### 5️⃣ Run frontend
+
+```
+npm run dev
+```
+
+
+### 6️⃣ Open in browser
+
+```
+http://localhost:3000
+```
+
+
+## 🔄 Core Functionalities
+
+### 📄 Document Management
+
+* Create, update, delete documents
+* Auto-save content in real-time
+
+### 👥 Collaboration
+
+* Add users as collaborators
+* Assign roles: `viewer` / `editor`
+
+### ⭐ Starred Documents
+
+* Mark important documents
+* Quick access filtering
+
+### 🔔 Notifications
+
+* Get notified when:
+
+  * Added as collaborator
+  * Document updates
+
+### 🕒 Version Control
+
+* Save document versions
+* View last changes
+
+---
