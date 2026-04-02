@@ -13,27 +13,6 @@ export const getMyDocs = query({
   },
 });
 
-// CREATE a new document
-export const createDoc = mutation({
-  args: {
-    title: v.string(),
-    ownerId: v.string(),
-    ownerName: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const docId = await ctx.db.insert("documents", {
-      title: args.title,
-      content: "# " + args.title + "\n\nStart writing...",
-      ownerId: args.ownerId,
-      ownerName: args.ownerName,
-      collaborators: [],
-      isPublic: false,
-      starred: v.optional(v.boolean()),
-    });
-    return docId;
-  },
-});
-
 // DELETE a document
 export const deleteDoc = mutation({
   args: { id: v.id("documents") },
@@ -130,3 +109,27 @@ export const addCollaborator = mutation({
     });
   },
 });
+
+
+
+export const createDoc = mutation({
+  args: {
+    title: v.string(),
+    ownerId: v.string(),
+    ownerName: v.string(),
+    content: v.optional(v.string()),  // ← add this
+  },
+  handler: async (ctx, args) => {
+    const docId = await ctx.db.insert('documents', {
+      title: args.title,
+      // Use provided content OR default starter text
+      content: args.content ?? ('# ' + args.title + '\n\nStart writing...'),
+      ownerId: args.ownerId,
+      ownerName: args.ownerName,
+      collaborators: [],
+      isPublic: false,
+      starred: false,
+    })
+    return docId
+  },
+})
