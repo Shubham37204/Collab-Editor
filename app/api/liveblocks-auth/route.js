@@ -1,59 +1,50 @@
-import Groq from "groq-sdk";
+import { Liveblocks } from '@liveblocks/node'
+import { auth, currentUser } from '@clerk/nextjs/server'
 
-const groq = new Groq({
-  apiKey: process.env.GROQ_API_KEY,
-});
-
-const PROMPTS = {
-  improve:   (t) => `Improve this text to be clearer and more engaging. Return ONLY the improved text:\n\n${t}`,
-  summarise: (t) => `Summarise this text concisely in 2-3 sentences. Return ONLY the summary:\n\n${t}`,
-  formal:    (t) => `Rewrite this text in a formal, professional tone. Return ONLY the rewritten text:\n\n${t}`,
-  continue:  (t) => `Continue writing naturally from where this text ends. Return ONLY the continuation:\n\n${t}`,
-  grammar:   (t) => `Fix all grammar and spelling errors. Return ONLY corrected text:\n\n${t}`,
-  shorter:   (t) => `Make this text shorter while keeping key info. Return ONLY shortened text:\n\n${t}`,
-};
+const liveblocks = new Liveblocks({
+  secret: process.env.LIVEBLOCKS_SECRET_KEY,
+})
 
 export async function POST(request) {
   try {
-    const { text, action } = await request.json();
+    const { userId } = await auth()
+    if (!userId) return new Response('Unauthorized', { status: 401 })
 
-    if (!text || !action || !PROMPTS[action]) {
-      return new Response("Invalid request", { status: 400 });
-    }
+    const user = await currentUser()
+    if (!user) return new Response('Unauthorized', { status: 401 })
 
-    // 🔥 Groq streaming response
-    const completion = await groq.chat.completions.create({
-      model: "llama3-8b-8192",
-      messages: [
-        {
-          role: "user",
-          content: PROMPTS[action](text),
-        },
-      ],
-      stream: true,
-    });
+    const body = await request.json()
+    const { room } = body
+    if (!room) return new Response('Room ID required', { status: 400 })
 
-    const readable = new ReadableStream({
-      async start(controller) {
-        for await (const chunk of completion) {
-          const content = chunk.choices?.[0]?.delta?.content;
-          if (content) {
-            controller.enqueue(new TextEncoder().encode(content));
-          }
-        }
-        controller.close();
+    const session = liveblocks.prepareSession(userId, {
+      userInfo: {
+        name: `${user.firstName || ''} ${user.lastName || ''}`.trim() || 'Anonymous',
+        color: generateColor(userId),
+        avatar: user.imageUrl || '',
       },
-    });
+    })
 
-    return new Response(readable, {
-      headers: {
-        "Content-Type": "text/plain; charset=utf-8",
-        "Transfer-Encoding": "chunked",
-      },
-    });
+    session.allow(room, session.FULL_ACCESS)
+
+    const { status, body: responseBody } = await session.authorize()
+    return new Response(responseBody, { status })
 
   } catch (err) {
-    console.error("Groq AI route error:", err);
-    return new Response("AI request failed", { status: 500 });
+    console.error('Liveblocks auth error:', err)
+    return new Response('Auth failed: ' + err.message, { status: 500 })
   }
+}
+
+function generateColor(userId) {
+  const colors = [
+    '#E57373', '#64B5F6', '#81C784',
+    '#FFB74D', '#BA68C8', '#4DB6AC',
+    '#F06292', '#7986CB', '#A1887F',
+  ]
+  let hash = 0
+  for (let i = 0; i < userId.length; i++) {
+    hash = userId.charCodeAt(i) + ((hash << 5) - hash)
+  }
+  return colors[Math.abs(hash) % colors.length]
 }

@@ -2,15 +2,26 @@ import { createClient } from '@liveblocks/client'
 import { createRoomContext } from '@liveblocks/react'
 
 const client = createClient({
-  authEndpoint: '/api/liveblocks-auth',
+  authEndpoint: async (room) => {
+    const response = await fetch('/api/liveblocks-auth', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ room }),
+    })
+
+    if (!response.ok) {
+      const text = await response.text()
+      throw new Error(`Auth failed: ${text}`)
+    }
+
+    return response.json()
+  },
 })
 
-// Presence = data each user broadcasts live (cursor position, name)
-// Storage = shared persistent data (the Y.js document content)
 export const {
   RoomProvider,
-  useOthers,          // hook: get list of other users in the room
-  useMyPresence,      // hook: read/update your own presence
-  useRoom,            // hook: get the raw room object (needed for Y.js)
-  useSelf,            // hook: your own user info
+  useOthers,
+  useMyPresence,
+  useRoom,
+  useSelf,
 } = createRoomContext(client)
