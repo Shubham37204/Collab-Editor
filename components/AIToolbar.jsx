@@ -1,12 +1,3 @@
-// ═══════════════════════════════════════════════════
-// Floating AI toolbar — appears above selected text
-// Props:
-//   position: { top, left } — where to render
-//   onAction: (action) => void — called when user picks an action
-//   loading: bool — shows spinner while AI is responding
-//   onClose: () => void
-// ═══════════════════════════════════════════════════
-
 'use client'
 import { useTheme } from '../app/layout'
 import { useEffect, useRef } from 'react'
@@ -24,7 +15,6 @@ export default function AIToolbar({ position, onAction, loading, onClose }) {
   const { theme } = useTheme()
   const ref = useRef(null)
 
-  // Close when clicking outside
   useEffect(() => {
     const handler = (e) => {
       if (ref.current && !ref.current.contains(e.target)) onClose()
@@ -54,7 +44,6 @@ export default function AIToolbar({ position, onAction, loading, onClose }) {
         transition: 'opacity 0.15s',
       }}
     >
-      {/* AI sparkle label */}
       <span style={{
         fontSize: '11px', color: theme.accent, fontFamily: theme.sans,
         fontWeight: '500', marginRight: '4px', letterSpacing: '0.2px',

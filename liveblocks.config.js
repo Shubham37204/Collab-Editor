@@ -25,3 +25,14 @@ export const {
   useRoom,
   useSelf,
 } = createRoomContext(client)
+
+// Suppress dev overlay
+if (typeof window !== 'undefined') {
+  const observer = new MutationObserver(() => {
+    document.querySelectorAll('[data-liveblocks-portal]').forEach(el => {
+      el.style.display = 'none'
+    })
+  })
+  observer.observe(document.body, { childList: true, subtree: true })
+}
+

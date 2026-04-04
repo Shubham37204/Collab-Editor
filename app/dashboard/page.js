@@ -13,7 +13,6 @@ export default function DashboardPage() {
   const { theme, dark, setDark } = useTheme();
   const notifRef = useRef(null);
 
-  // ── States ──────────────────────────────────────────
   const [showModal, setShowModal] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [creating, setCreating] = useState(false);
@@ -24,7 +23,6 @@ export default function DashboardPage() {
   const [shareEmail, setShareEmail] = useState("");
   const [shareRole, setShareRole] = useState("editor");
 
-  // ── Convex ───────────────────────────────────────────
   const docs = useQuery(api.documents.getMyDocs, { ownerId: user?.id ?? "" });
   const notifications = useQuery(api.notifications.getMyNotifications, {
     userId: user?.id ?? "",
@@ -35,12 +33,10 @@ export default function DashboardPage() {
   const markAllRead = useMutation(api.notifications.markAllRead);
   const addCollab = useMutation(api.documents.addCollaborator);
 
-  // ── Auth redirect ────────────────────────────────────
   useEffect(() => {
     if (isLoaded && !isSignedIn) router.push("/");
   }, [isLoaded, isSignedIn, router]);
 
-  // ── Close notifs when clicking outside ──────────────
   useEffect(() => {
     const handler = (e) => {
       if (notifRef.current && !notifRef.current.contains(e.target)) {
@@ -51,7 +47,6 @@ export default function DashboardPage() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // ── Handlers ─────────────────────────────────────────
   const handleCreateDoc = async () => {
     setCreating(true);
     const title = newTitle.trim() || "Untitled Document";
@@ -86,17 +81,12 @@ export default function DashboardPage() {
     if (!showNotifs && user?.id) markAllRead({ userId: user.id });
   };
 
-  // ── Derived ──────────────────────────────────────────
-  // [FEATURE: search filter] client-side, no extra query
   const filteredDocs =
     docs
       ?.filter((d) => d.title.toLowerCase().includes(search.toLowerCase()))
-      // [FEATURE: starred docs sort to top]
       .sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0)) ?? [];
 
   const unreadCount = notifications?.filter((n) => !n.read).length ?? 0;
-
-  // currently shared doc (for share modal collaborator list)
   const shareDoc = docs?.find((d) => d._id === shareDocId);
 
   if (!isLoaded)
@@ -122,7 +112,6 @@ export default function DashboardPage() {
       </div>
     );
 
-  // ── Styles (shared) ──────────────────────────────────
   const ghostBtn = {
     background: "none",
     border: "none",
@@ -134,6 +123,7 @@ export default function DashboardPage() {
     borderRadius: "6px",
     transition: "color 0.15s",
   };
+
   const inputStyle = {
     background: theme.badge,
     border: `1px solid ${theme.border}`,
@@ -144,6 +134,7 @@ export default function DashboardPage() {
     borderRadius: "20px",
     padding: "7px 16px",
   };
+
   const modalInput = {
     width: "100%",
     padding: "11px 14px",
@@ -157,6 +148,7 @@ export default function DashboardPage() {
     boxSizing: "border-box",
     transition: "border 0.15s",
   };
+
   const accentBtn = {
     background: theme.accent,
     color: "#fff",
@@ -168,6 +160,7 @@ export default function DashboardPage() {
     cursor: "pointer",
     transition: "opacity 0.15s",
   };
+  
   const cancelBtn = {
     background: theme.badge,
     color: theme.text,

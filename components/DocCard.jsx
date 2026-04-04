@@ -1,12 +1,3 @@
-// ═══════════════════════════════════════════════════════
-// FEATURES IN THIS FILE:
-// [1] Hover reveal action buttons (star, share, delete)
-// [2] Starred indicator (★ in accent color)
-// [3] Shared badge (👥 shared) when collaborators exist
-// [4] Word count + date in subtitle
-// [5] Smooth hover transition with card lift effect
-// ═══════════════════════════════════════════════════════
-
 'use client'
 import { useTheme } from '../app/layout'
 import { useState } from 'react'

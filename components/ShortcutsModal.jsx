@@ -1,8 +1,3 @@
-// ═══════════════════════════════════════════════════
-// FEATURE: Keyboard shortcuts reference modal
-// Triggered by pressing ? anywhere in the editor
-// ═══════════════════════════════════════════════════
-
 "use client";
 import { useTheme } from "../app/layout";
 import { useEffect } from "react";

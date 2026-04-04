@@ -1,38 +1,104 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fafaf8;
+  --foreground: #1a1816;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  padding: 0;
 }
 
-/* [EXPORT PDF] — hides UI when printing */
+/* ── Hide Liveblocks dev overlay completely ── */
+[data-liveblocks-portal],
+[data-liveblocks-overlay],
+.__liveblocks_overlay__,
+[class*="liveblocks-"]:not([class*="liveblocks-provider"]) {
+  display: none !important;
+}
+
+/* ── CodeMirror light theme fixes ── */
+.cm-editor {
+  height: 100%;
+  font-size: 14px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+}
+
+.cm-editor.cm-focused {
+  outline: none;
+}
+
+.cm-scroller {
+  padding: 16px 0;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace !important;
+}
+
+.cm-line {
+  padding: 0 24px;
+}
+
+.cm-gutters {
+  border-right: 1px solid #e8e4de;
+  background: transparent;
+  color: #c8c4be;
+  font-size: 12px;
+}
+
+/* ── Dark mode CodeMirror gutters ── */
+.dark .cm-gutters {
+  border-right: 1px solid #2a2a2a;
+  color: #444;
+}
+
+/* ── Scrollbar styling ── */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4cfc8;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b8b0a8;
+}
+
+/* ── Selection color ── */
+::selection {
+  background: #b8935a33;
+  color: inherit;
+}
+
+/* ── Print / PDF export ── */
 @media print {
-  nav, header, .toolbar, button { display: none !important; }
-  .preview-content { 
-    max-width: 100% !important; 
+  nav,
+  header,
+  .toolbar,
+  button,
+  [data-no-print] {
+    display: none !important;
+  }
+
+  .preview-content {
+    max-width: 100% !important;
     padding: 0 !important;
     font-size: 12pt !important;
     line-height: 1.6 !important;
   }
 }
 
+/* ── Smooth transitions ── */
+a, button {
+  transition: all 0.15s ease;
+}
