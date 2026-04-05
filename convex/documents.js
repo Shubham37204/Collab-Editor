@@ -38,10 +38,13 @@ export const getDocById = query({
 export const updateContent = mutation({
   args: { id: v.id("documents"), content: v.string() },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.id, { content: args.content });
+    const sizeInBytes = new TextEncoder().encode(args.content).length
+    if (sizeInBytes > 900_000) {
+      throw new Error(`Content too large: ${Math.round(sizeInBytes / 1024)}KB. Maximum is 900KB.`)
+    }
+    await ctx.db.patch(args.id, { content: args.content })
   },
-});
-
+})
 
 export const toggleStar = mutation({
   args: { id: v.id("documents") },

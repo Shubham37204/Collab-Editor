@@ -81,6 +81,12 @@ export default function Editor({
       clearTimeout(saveTimerRef.current);
       setSaving(true);
       saveTimerRef.current = setTimeout(async () => {
+        const sizeKB = new Blob([value]).size / 1024;
+        if (sizeKB > 900) {
+          console.warn(`Content too large to save: ${Math.round(sizeKB)}KB`);
+          setSaving(false);
+          return;
+        }
         await saveContent({ id: docId, content: value });
         setSaving(false);
       }, 1000);
@@ -251,8 +257,8 @@ export default function Editor({
         fontSize: "15px",
         fontFamily: "'Georgia', serif",
       },
-      ".cm-content": { padding: "0", caretColor: "#b8935a" },
-      ".cm-line": { padding: "0 0 2px 0", lineHeight: "1.8" },
+      ".cm-content": { padding: "16px 0", caretColor: "#b8935a" },
+      ".cm-line": { padding: "0 0 3px 0", lineHeight: "1.8" },
       ".cm-cursor": { borderLeftColor: "#b8935a" },
       ".cm-selectionBackground": { background: "#b8935a22 !important" },
       ".cm-gutters": { display: "none" },
@@ -650,11 +656,12 @@ export default function Editor({
             fontSize: "14px",
             display: preview ? "none" : "flex",
             flexDirection: "column",
+            padding: "24px 48px",
             ...(focusMode && {
               maxWidth: "740px",
               margin: "0 auto",
               width: "100%",
-              padding: "48px 0",
+              padding: "48px 64px",
             }),
           }}
         />
