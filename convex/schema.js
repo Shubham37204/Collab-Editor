@@ -20,7 +20,7 @@ export default defineSchema({
     .index('by_public', ['isPublic']),
 
   notifications: defineTable({
-    userId: v.string(),       // who receives it
+    userId: v.string(),       
     message: v.string(),
     docId: v.string(),
     docTitle: v.string(),

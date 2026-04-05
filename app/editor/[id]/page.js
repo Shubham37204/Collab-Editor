@@ -6,7 +6,6 @@ import { api } from '../../../convex/_generated/api'
 import { RoomProvider } from '../../../liveblocks.config'
 import { ClientSideSuspense } from '@liveblocks/react'
 import dynamic from 'next/dynamic'
-
 const Editor = dynamic(() => import('../../../components/Editor'), { ssr: false })
 
 export default function EditorPage() {
@@ -48,8 +47,6 @@ export default function EditorPage() {
       id={`doc-${id}`}
       initialPresence={{ name: user?.firstName || 'Anonymous', cursor: null }}
     >
-      {/* ClientSideSuspense — fallback shown while Liveblocks connects */}
-      {/* Using null as fallback hides the Liveblocks connection banner */}
       <ClientSideSuspense fallback={null}>
         {() => (
           <Editor

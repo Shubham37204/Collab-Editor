@@ -1,7 +1,7 @@
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
-// GET all docs for the logged-in user
+
 export const getMyDocs = query({
   args: { ownerId: v.string() },
   handler: async (ctx, args) => {
@@ -21,15 +21,12 @@ export const deleteDoc = mutation({
   },
 });
 
-// UPDATE title
 export const updateTitle = mutation({
   args: { id: v.id("documents"), title: v.string() },
   handler: async (ctx, args) => {
     await ctx.db.patch(args.id, { title: args.title });
   },
 });
-
-// Add this to your existing convex/documents.js
 
 export const getDocById = query({
   args: { id: v.id("documents") },
@@ -38,7 +35,6 @@ export const getDocById = query({
   },
 });
 
-// Also add this — saves content on every keystroke (debounced on frontend)
 export const updateContent = mutation({
   args: { id: v.id("documents"), content: v.string() },
   handler: async (ctx, args) => {
@@ -46,7 +42,6 @@ export const updateContent = mutation({
   },
 });
 
-// Add to your existing convex/documents.js
 
 export const toggleStar = mutation({
   args: { id: v.id("documents") },
@@ -110,26 +105,23 @@ export const addCollaborator = mutation({
   },
 });
 
-
-
 export const createDoc = mutation({
   args: {
     title: v.string(),
     ownerId: v.string(),
     ownerName: v.string(),
-    content: v.optional(v.string()),  // ← add this
+    content: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const docId = await ctx.db.insert('documents', {
+    const docId = await ctx.db.insert("documents", {
       title: args.title,
-      // Use provided content OR default starter text
-      content: args.content ?? ('# ' + args.title + '\n\nStart writing...'),
+      content: args.content ?? "",
       ownerId: args.ownerId,
       ownerName: args.ownerName,
       collaborators: [],
       isPublic: false,
       starred: false,
-    })
-    return docId
+    });
+    return docId;
   },
-})
+});

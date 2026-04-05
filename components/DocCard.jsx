@@ -16,7 +16,7 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
   const handleStar  = (e) => { e.stopPropagation(); onStar() }
   const handleShare = (e) => { e.stopPropagation(); onShare() }
 
-  // [FEATURE 4] Word count
+  //FEATURE 4 Word count
   const wordCount = doc.content
     ? doc.content.trim().split(/\s+/).filter(Boolean).length
     : 0
@@ -68,7 +68,7 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
               {doc.title}
             </h3>
 
-            {/* [FEATURE 2] Starred */}
+            {/*FEATURE 2 Starred */}
             {doc.starred && (
               <span style={{ color: theme.accent, fontSize: '13px', lineHeight: 1 }}>★</span>
             )}
@@ -85,7 +85,7 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
             )}
           </div>
 
-          {/* [FEATURE 4] Date + word count */}
+          {/*FEATURE 4 Date + word count */}
           <p style={{
             fontSize: '12px', color: theme.muted,
             fontFamily: theme.sans, margin: 0,
@@ -99,7 +99,7 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
         </div>
       </div>
 
-      {/* [FEATURE 1] Hover actions */}
+      {/* FEATURE 1 Hover actions */}
       {hovered && (
         <div
           style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}

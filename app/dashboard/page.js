@@ -98,6 +98,8 @@ export default function DashboardPage() {
           alignItems: "center",
           justifyContent: "center",
           background: theme.bg,
+          display: "flex",
+          flexDirection: "column",
         }}
       >
         <span
@@ -160,7 +162,7 @@ export default function DashboardPage() {
     cursor: "pointer",
     transition: "opacity 0.15s",
   };
-  
+
   const cancelBtn = {
     background: theme.badge,
     color: theme.text,
@@ -176,9 +178,6 @@ export default function DashboardPage() {
     <div
       style={{ minHeight: "100vh", background: theme.bg, color: theme.text }}
     >
-      {/* ══════════════════════════════════════════════
-          [FEATURE 1] Sticky navbar
-      ══════════════════════════════════════════════ */}
       <header
         style={{
           display: "flex",
@@ -405,7 +404,7 @@ export default function DashboardPage() {
             }}
           >
             {dark ? "☀ Light" : "☾ Dark"}
-          </button>        
+          </button>
 
           <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
             <span
@@ -422,11 +421,14 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* ══════════════════════════════════════════════
-          Main content
-      ══════════════════════════════════════════════ */}
+      {/*  Main content*/}
       <main
-        style={{ maxWidth: "860px", margin: "0 auto", padding: "56px 32px" }}
+        style={{
+          maxWidth: "860px",
+          margin: "0 auto",
+          padding: "56px 32px",
+          flex: 1,
+        }}
       >
         <div
           style={{
@@ -546,9 +548,6 @@ export default function DashboardPage() {
         )}
       </main>
 
-      {/* ══════════════════════════════════════════════
-          [FEATURE 4] Create document modal
-      ══════════════════════════════════════════════ */}
       {showModal && (
         <div
           style={{
@@ -629,9 +628,6 @@ export default function DashboardPage() {
         </div>
       )}
 
-      {/* ══════════════════════════════════════════════
-          [FEATURE 5] Share modal
-      ══════════════════════════════════════════════ */}
       {showShare && (
         <div
           style={{

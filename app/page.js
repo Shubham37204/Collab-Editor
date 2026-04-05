@@ -229,8 +229,7 @@ export default function HomePage() {
             key={f.num}
             style={{
               padding: "32px 28px",
-              borderRight:
-                i < 2 ? `1px solid ${theme.border}` : "none",
+              borderRight: i < 2 ? `1px solid ${theme.border}` : "none",
             }}
           >
             <span
@@ -269,36 +268,6 @@ export default function HomePage() {
           </div>
         ))}
       </section>
-
-      {/* Footer */}
-      <footer
-        style={{
-          borderTop: `1px solid ${theme.border}`,
-          padding: "20px 48px",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "12px",
-            color: theme.muted,
-            fontFamily: "sans-serif",
-          }}
-        >
-          © 2025 CollabDocs
-        </span>
-        <span
-          style={{
-            fontSize: "12px",
-            color: theme.muted,
-            fontFamily: "sans-serif",
-          }}
-        >
-          Built with Next.js & Convex
-        </span>
-      </footer>
     </main>
   );
 }

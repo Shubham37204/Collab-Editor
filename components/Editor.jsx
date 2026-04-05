@@ -7,9 +7,12 @@ import { useTheme } from "../app/layout";
 import { useOthers, useRoom } from "../liveblocks.config";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import rehypeSlug from "rehype-slug";
 import AIToolbar from "./AIToolbar";
 import VersionPanel from "./VersionPanel";
 import ShortcutsModal from "./ShortcutsModal";
+import TableOfContents from "./TableOfContents";
+import TopBar from "./TopBar";
 import { EditorView } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { basicSetup } from "codemirror";
@@ -18,17 +21,22 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import * as Y from "yjs";
 import { LiveblocksYjsProvider } from "@liveblocks/yjs";
 import { yCollab } from "y-codemirror.next";
-import TopBar from "./TopBar";
 
 const SLASH_COMMANDS = [
-  { label: "Heading 1", icon: "H1", insert: "# " },
-  { label: "Heading 2", icon: "H2", insert: "## " },
-  { label: "Heading 3", icon: "H3", insert: "### " },
-  { label: "Quote", icon: "❝", insert: "> " },
-  { label: "Code block", icon: "</>", insert: "```\n\n```" },
-  { label: "Bullet list", icon: "•", insert: "- " },
-  { label: "Task list", icon: "☐", insert: "- [ ] " },
-  { label: "Divider", icon: "—", insert: "\n---\n" },
+  { icon: "H1", label: "Heading 1", filter: "h1", insert: "# " },
+  { icon: "H2", label: "Heading 2", filter: "h2", insert: "## " },
+  { icon: "H3", label: "Heading 3", filter: "h3", insert: "### " },
+  { icon: "❝", label: "Quote", filter: "quote", insert: "> " },
+  { icon: "</>", label: "Code block", filter: "code", insert: "```\n\n```" },
+  { icon: "•", label: "Bullet list", filter: "list", insert: "- " },
+  { icon: "☐", label: "Task list", filter: "task", insert: "- [ ] " },
+  { icon: "—", label: "Divider", filter: "divider", insert: "\n---\n" },
+  {
+    icon: "⊞",
+    label: "Table",
+    filter: "table",
+    insert: "| Col 1 | Col 2 |\n|-------|-------|\n| | |",
+  },
 ];
 
 export default function Editor({
@@ -38,7 +46,7 @@ export default function Editor({
   currentUserId,
 }) {
   const router = useRouter();
-  const { theme, dark, setDark } = useTheme();
+  const { theme, dark } = useTheme();
   const room = useRoom();
   const others = useOthers();
 
@@ -47,6 +55,8 @@ export default function Editor({
   const saveTimerRef = useRef(null);
   const titleTimerRef = useRef(null);
   const ydocRef = useRef(null);
+  const previewPanelRef = useRef(null);
+  const seededRef = useRef(false);
 
   const [content, setContent] = useState(initialContent || "");
   const [title, setTitle] = useState(initialTitle || "");
@@ -78,7 +88,6 @@ export default function Editor({
     [docId, saveContent],
   );
 
-  // ── All handlers BEFORE useEffects ──────────────────
   const handleManualSave = async () => {
     setSaving(true);
     await Promise.all([
@@ -93,6 +102,26 @@ export default function Editor({
       }),
     ]);
     setSaving(false);
+  };
+
+  const handleFormat = (syntax, block = false) => {
+    const view = editorViewRef.current;
+    if (!view) return;
+    const { from, to } = view.state.selection.main;
+    const selected = view.state.doc.sliceString(from, to);
+    const insert = block
+      ? `${syntax}${selected}`
+      : `${syntax}${selected}${syntax}`;
+    view.dispatch({ changes: { from, to, insert } });
+    view.focus();
+  };
+
+  const handleTitleChange = (value) => {
+    setTitle(value);
+    clearTimeout(titleTimerRef.current);
+    titleTimerRef.current = setTimeout(async () => {
+      await saveTitle({ id: docId, title: value });
+    }, 800);
   };
 
   const handleAIAction = async (action) => {
@@ -157,15 +186,7 @@ export default function Editor({
     setSlashMenu(null);
   };
 
-  const handleTitleChange = (value) => {
-    setTitle(value);
-    clearTimeout(titleTimerRef.current);
-    titleTimerRef.current = setTimeout(async () => {
-      await saveTitle({ id: docId, title: value });
-    }, 800);
-  };
-
-  // ── Keyboard shortcuts ───────────────────────────────
+  // ── Keyboard shortcuts ──
   useEffect(() => {
     const handler = (e) => {
       const mod = e.metaKey || e.ctrlKey;
@@ -201,21 +222,28 @@ export default function Editor({
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  // ── CodeMirror + Y.js mount ──────────────────────────
+  // ── CodeMirror + Y.js mount ──
   useEffect(() => {
     if (!editorContainerRef.current) return;
 
     const ydoc = new Y.Doc();
     ydocRef.current = ydoc;
+
     const provider = new LiveblocksYjsProvider(room, ydoc);
     const ytext = ydoc.getText("document-content");
 
-    if (ytext.length === 0 && initialContent) ytext.insert(0, initialContent);
+    const tryInsert = () => {
+      if (!seededRef.current && ytext.length === 0 && initialContent) {
+        seededRef.current = true;
+        ytext.insert(0, initialContent);
+      }
+    };
+    tryInsert();
+    provider.on("sync", tryInsert);
 
     const { awareness } = provider;
     awareness.setLocalStateField("user", { name: "Me", color: "#b8935a" });
 
-    // Light theme for CodeMirror that matches our design
     const lightTheme = EditorView.theme({
       "&": {
         background: "transparent",
@@ -267,7 +295,10 @@ export default function Editor({
             setContent(value);
             debouncedSave(value);
           }
+
           const selection = update.state.selection.main;
+
+          // AI toolbar on text selection
           if (selection.from !== selection.to) {
             const coords = update.view.coordsAtPos(selection.from);
             if (coords) {
@@ -277,6 +308,8 @@ export default function Editor({
           } else {
             setAiToolbar(null);
           }
+
+          // Slash commands
           const line = update.state.doc.lineAt(selection.head);
           const lineText = line.text;
           if (lineText.startsWith("/")) {
@@ -292,7 +325,10 @@ export default function Editor({
       ],
     });
 
-    const view = new EditorView({ state, parent: editorContainerRef.current });
+    const view = new EditorView({
+      state,
+      parent: editorContainerRef.current,
+    });
     editorViewRef.current = view;
 
     return () => {
@@ -303,59 +339,6 @@ export default function Editor({
   }, [room, dark]);
 
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
-  const readTime = Math.max(1, Math.ceil(wordCount / 200));
-
-  // ── Styles ───────────────────────────────────────────
-  const s = {
-    topbar: {
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      padding: "0 24px",
-      height: "52px",
-      borderBottom: `1px solid ${theme.border}`,
-      background: theme.bg,
-      position: "sticky",
-      top: 0,
-      zIndex: 20,
-    },
-    toolbarBtn: (active) => ({
-      background: active ? theme.badge : "transparent",
-      border: `1px solid ${active ? theme.border : "transparent"}`,
-      borderRadius: "6px",
-      padding: "5px 12px",
-      fontSize: "12px",
-      color: active ? theme.text : theme.muted,
-      cursor: "pointer",
-      fontFamily: theme.sans,
-      transition: "all 0.15s",
-    }),
-    iconBtn: {
-      background: "transparent",
-      border: "none",
-      color: theme.muted,
-      cursor: "pointer",
-      padding: "6px",
-      borderRadius: "6px",
-      fontSize: "13px",
-      fontFamily: theme.sans,
-      display: "flex",
-      alignItems: "center",
-      gap: "4px",
-      transition: "all 0.15s",
-    },
-    accentBtn: {
-      background: theme.accent,
-      color: "#fff",
-      border: "none",
-      padding: "6px 14px",
-      borderRadius: "6px",
-      fontFamily: theme.sans,
-      fontSize: "12px",
-      cursor: "pointer",
-    },
-  };
-
   const toolbarButtonStyle = (active = false) => ({
     background: active ? theme.accent + "22" : "transparent",
     border: `1px solid ${active ? theme.accent + "66" : theme.border}`,
@@ -391,13 +374,12 @@ export default function Editor({
         color: theme.text,
       }}
     >
-      {/* ── TOP NAV ─────────────────────────────── */}
+      {/* TOP NAV */}
       {!focusMode && (
         <TopBar
           showBack={true}
           rightContent={
             <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              {/* Live collaborator avatars */}
               {others.length > 0 && (
                 <div style={{ display: "flex", alignItems: "center" }}>
                   {others.slice(0, 4).map((other, i) => (
@@ -437,8 +419,6 @@ export default function Editor({
                   </span>
                 </div>
               )}
-
-              {/* Saving indicator */}
               <span
                 style={{
                   fontSize: "12px",
@@ -454,7 +434,7 @@ export default function Editor({
         />
       )}
 
-      {/* ── SECONDARY TOOLBAR ───────────────────── */}
+      {/*SECONDARY TOOLBAR */}
       {!focusMode && (
         <div
           style={{
@@ -475,7 +455,6 @@ export default function Editor({
             { label: "H1", val: "# ", block: true, title: "Heading 1" },
             { label: "H2", val: "## ", block: true, title: "Heading 2" },
             { label: "</>", val: "`", block: false, title: "Inline code" },
-            { label: "{ }", val: "```\n", block: true, title: "Code block" },
           ].map((btn) => (
             <button
               key={btn.label}
@@ -504,14 +483,12 @@ export default function Editor({
           >
             {preview ? "Hide Preview" : "Preview"}
           </button>
-
           <button
             onClick={() => setFocusMode(true)}
             style={toolbarButtonStyle(false)}
           >
             Focus
           </button>
-
           <button
             onClick={() => setShowVersions((v) => !v)}
             style={toolbarButtonStyle(showVersions)}
@@ -520,11 +497,8 @@ export default function Editor({
           </button>
 
           {divider}
-
-          {/* Spacer */}
           <div style={{ flex: 1 }} />
 
-          {/* Collaborators count (mobile fallback) */}
           {others.length > 0 && (
             <span
               style={{
@@ -560,7 +534,7 @@ export default function Editor({
                   borderRadius: "8px",
                   overflow: "hidden",
                   zIndex: 100,
-                  minWidth: "160px",
+                  minWidth: "170px",
                   boxShadow: dark
                     ? "0 8px 32px rgba(0,0,0,0.4)"
                     : "0 8px 32px rgba(0,0,0,0.1)",
@@ -603,7 +577,7 @@ export default function Editor({
             )}
           </div>
 
-          {/* Save button */}
+          {/* Save */}
           <button
             onClick={handleManualSave}
             disabled={saving}
@@ -625,7 +599,7 @@ export default function Editor({
         </div>
       )}
 
-      {/* ── TITLE INPUT ─────────────────────────── */}
+      {/*TITLE INPUT */}
       {!focusMode && (
         <div
           style={{
@@ -654,7 +628,6 @@ export default function Editor({
         </div>
       )}
 
-      {/* ── EDITOR + PREVIEW + VERSION PANEL ────── */}
       <div
         style={{
           flex: 1,
@@ -663,7 +636,12 @@ export default function Editor({
           position: "relative",
         }}
       >
-        {/* CodeMirror */}
+        {/* TOC: only shows when preview is active */}
+        {preview && !focusMode && (
+          <TableOfContents content={content} previewRef={previewPanelRef} />
+        )}
+
+        {/* CodeMirror*/}
         <div
           ref={editorContainerRef}
           style={{
@@ -681,9 +659,10 @@ export default function Editor({
           }}
         />
 
-        {/* Split preview panel */}
+        {/* Split preview panel — with ref for TOC scroll-spy */}
         {preview && !focusMode && (
           <div
+            ref={previewPanelRef}
             className="preview-content"
             style={{
               flex: 1,
@@ -697,11 +676,16 @@ export default function Editor({
               fontSize: "15px",
             }}
           >
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              rehypePlugins={[rehypeSlug]}
+            >
+              {content}
+            </ReactMarkdown>
           </div>
         )}
 
-        {/* Full preview mode */}
+        {/*  Full preview mode (focus)*/}
         {preview && focusMode && (
           <div style={{ flex: 1, overflow: "auto", background: theme.bg }}>
             <div
@@ -715,7 +699,10 @@ export default function Editor({
                 color: theme.text,
               }}
             >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              <ReactMarkdown
+                remarkPlugins={[remarkGfm]}
+                rehypePlugins={[rehypeSlug]}
+              >
                 {content}
               </ReactMarkdown>
             </div>
@@ -744,7 +731,7 @@ export default function Editor({
         )}
       </div>
 
-      {/* ── FOCUS MODE EXIT ──────────────────────── */}
+      {/* FOCUS MODE EXIT*/}
       {focusMode && (
         <button
           onClick={() => setFocusMode(false)}
@@ -768,7 +755,7 @@ export default function Editor({
         </button>
       )}
 
-      {/* ── SLASH COMMAND MENU ───────────────────── */}
+      {/* SLASH COMMAND MENU */}
       {slashMenu && (
         <div
           style={{
@@ -783,9 +770,10 @@ export default function Editor({
             boxShadow: dark
               ? "0 8px 32px rgba(0,0,0,0.5)"
               : "0 8px 32px rgba(0,0,0,0.12)",
-            minWidth: "200px",
+            minWidth: "210px",
           }}
         >
+          {/* Header label */}
           <div
             style={{
               padding: "6px 12px",
@@ -799,6 +787,7 @@ export default function Editor({
           >
             Insert block
           </div>
+
           {SLASH_COMMANDS.filter(
             (c) =>
               c.filter.includes(slashFilter.toLowerCase()) ||
@@ -827,23 +816,32 @@ export default function Editor({
               }
               onMouseLeave={(e) => (e.currentTarget.style.background = "none")}
             >
+              {/* Icon badge */}
               <span
                 style={{
                   fontFamily: "monospace",
                   color: theme.accent,
-                  fontSize: "12px",
-                  minWidth: "28px",
+                  fontSize: "11px",
+                  background: theme.accent + "18",
+                  padding: "1px 5px",
+                  borderRadius: "3px",
+                  minWidth: "32px",
+                  textAlign: "center",
+                  display: "inline-block",
                 }}
               >
-                {cmd.label.split(" ")[0]}
+                {cmd.icon}
               </span>
-              <span>{cmd.label.split(" ").slice(1).join(" ")}</span>
+              {/* Label */}
+              <span style={{ fontSize: "13px", color: theme.text }}>
+                {cmd.label}
+              </span>
             </button>
           ))}
         </div>
       )}
 
-      {/* ── AI TOOLBAR ───────────────────────────── */}
+      {/* AI TOOLBAR*/}
       <AIToolbar
         position={aiToolbar}
         onAction={handleAIAction}
@@ -851,7 +849,7 @@ export default function Editor({
         onClose={() => setAiToolbar(null)}
       />
 
-      {/* ── STATUS BAR ───────────────────────────── */}
+      {/* STATUS BAR*/}
       {!focusMode && (
         <div
           style={{
@@ -881,24 +879,10 @@ export default function Editor({
         </div>
       )}
 
-      {/* ── SHORTCUTS MODAL ─────────────────────── */}
+      {/*SHORTCUTS MODAL*/}
       {showShortcuts && (
         <ShortcutsModal onClose={() => setShowShortcuts(false)} />
       )}
     </div>
   );
-}
-
-function toolbarBtn(theme, active) {
-  return {
-    background: active ? theme.badge : "none",
-    border: `1px solid ${active ? theme.border : "transparent"}`,
-    borderRadius: "6px",
-    padding: "5px 12px",
-    fontSize: "12px",
-    color: active ? theme.text : theme.muted,
-    cursor: "pointer",
-    fontFamily: "sans-serif",
-    transition: "all 0.15s ease",
-  };
 }
