@@ -14,7 +14,6 @@ body {
   padding: 0;
 }
 
-/* ── Hide Liveblocks dev overlay completely ── */
 [data-liveblocks-portal],
 [data-liveblocks-overlay],
 .__liveblocks_overlay__,
@@ -22,7 +21,6 @@ body {
   display: none !important;
 }
 
-/* ── CodeMirror light theme fixes ── */
 .cm-editor {
   height: 100%;
   font-size: 14px;
@@ -80,25 +78,185 @@ body {
   color: inherit;
 }
 
-/* ── Print / PDF export ── */
-@media print {
-  nav,
-  header,
-  .toolbar,
-  button,
-  [data-no-print] {
-    display: none !important;
-  }
-
-  .preview-content {
-    max-width: 100% !important;
-    padding: 0 !important;
-    font-size: 12pt !important;
-    line-height: 1.6 !important;
-  }
-}
-
 /* ── Smooth transitions ── */
 a, button {
   transition: all 0.15s ease;
+}
+
+@media print {
+
+  /* ── Page size and margins ── */
+  @page {
+    size: A4;
+    margin: 1.5cm 2cm;
+  }
+
+  /* ── Force white background everywhere ── */
+  html, body {
+    background: #fff !important;
+    color: #000 !important;
+  }
+
+  /* ── Hide ALL UI chrome ── */
+  nav,
+  header,
+  button,
+  [data-no-print],
+
+  /* Toolbar */
+  [class*="toolbar"],
+
+  /* CodeMirror editor — never print raw markdown */
+  .cm-editor,
+  .cm-scroller,
+  .cm-content,
+  .cm-gutters,
+  .cm-line,
+
+  /* Status bar */
+  [class*="status"],
+
+  /* Liveblocks branding + badge */
+  [data-liveblocks-portal],
+  [data-liveblocks-overlay],
+  [class*="liveblocks"],
+  [class*="lb-"],
+  a[href*="liveblocks.io"] {
+    display: none !important;
+  }
+
+  /* ── Show ONLY the preview panel ── */
+  .preview-content {
+    display: block !important;
+    position: static !important;
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+
+    /* Typography for print */
+    font-family: 'Georgia', 'Times New Roman', serif !important;
+    font-size: 11pt !important;
+    line-height: 1.7 !important;
+    color: #000 !important;
+    background: #fff !important;
+  }
+
+  /* ── Markdown element styles for print ── */
+  .preview-content h1 {
+    font-size: 20pt !important;
+    font-weight: 600 !important;
+    margin-bottom: 12pt !important;
+    border-bottom: 1px solid #ccc;
+    padding-bottom: 6pt;
+    page-break-after: avoid;
+  }
+
+  .preview-content h2 {
+    font-size: 16pt !important;
+    font-weight: 600 !important;
+    margin-top: 16pt !important;
+    margin-bottom: 8pt !important;
+    page-break-after: avoid;
+  }
+
+  .preview-content h3 {
+    font-size: 13pt !important;
+    font-weight: 600 !important;
+    margin-top: 12pt !important;
+    page-break-after: avoid;
+  }
+
+  .preview-content p {
+    margin-bottom: 8pt !important;
+    orphans: 3;
+    widows: 3;
+  }
+
+  .preview-content code {
+    font-family: 'Courier New', monospace !important;
+    font-size: 9pt !important;
+    background: #f5f5f5 !important;
+    padding: 1pt 4pt !important;
+    border-radius: 2pt;
+  }
+
+  .preview-content pre {
+    background: #f5f5f5 !important;
+    border: 1px solid #ddd !important;
+    padding: 10pt !important;
+    border-radius: 4pt !important;
+    font-size: 9pt !important;
+    page-break-inside: avoid;
+    overflow: visible !important;
+    white-space: pre-wrap !important;
+  }
+
+  .preview-content pre code {
+    background: none !important;
+    padding: 0 !important;
+  }
+
+  .preview-content blockquote {
+    border-left: 3pt solid #999 !important;
+    padding-left: 12pt !important;
+    color: #555 !important;
+    margin: 8pt 0 !important;
+    font-style: italic;
+  }
+
+  .preview-content ul,
+  .preview-content ol {
+    padding-left: 20pt !important;
+    margin-bottom: 8pt !important;
+  }
+
+  .preview-content li {
+    margin-bottom: 3pt !important;
+  }
+
+  .preview-content table {
+    width: 100% !important;
+    border-collapse: collapse !important;
+    margin-bottom: 12pt !important;
+    page-break-inside: avoid;
+  }
+
+  .preview-content th,
+  .preview-content td {
+    border: 1px solid #ccc !important;
+    padding: 6pt 8pt !important;
+    text-align: left !important;
+    font-size: 10pt !important;
+  }
+
+  .preview-content th {
+    background: #f0f0f0 !important;
+    font-weight: 600 !important;
+  }
+
+  .preview-content hr {
+    border: none !important;
+    border-top: 1px solid #ccc !important;
+    margin: 16pt 0 !important;
+  }
+
+  .preview-content a {
+    color: #000 !important;
+    text-decoration: underline !important;
+  }
+
+  /* ── Avoid page breaks inside key elements ── */
+  .preview-content h1,
+  .preview-content h2,
+  .preview-content h3,
+  .preview-content pre,
+  .preview-content table,
+  .preview-content blockquote {
+    page-break-inside: avoid;
+  }
 }

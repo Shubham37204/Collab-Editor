@@ -178,10 +178,17 @@ export default function Editor({
   };
 
   const handleExportPDF = () => {
-    window.print();
+    if (!preview) {
+      setPreview(true);
+      setTimeout(() => {
+        window.print();
+        setTimeout(() => setPreview(false), 500);
+      }, 350);
+    } else {
+      window.print();
+    }
     setShowExport(false);
   };
-
   const handleSlashCommand = (cmd) => {
     const view = editorViewRef.current;
     if (!view) return;
