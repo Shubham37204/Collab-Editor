@@ -55,7 +55,7 @@ export default function UnifiedHeader({
           placeholder="Untitled"
           className="text-sm font-sans font-medium bg-transparent border-none outline-none text-foreground tracking-tight w-full max-w-[150px] placeholder:text-muted/50"
         />
-        <span className={`text-[10px] font-sans font-medium tracking-wide uppercase whitespace-nowrap ml-2 ${saving ? 'text-primary animate-pulse drop-shadow-[0_0_5px_rgba(99,102,241,0.5)]' : 'text-muted'}`}>
+        <span className={`text-[10px] font-sans font-medium tracking-wide uppercase whitespace-nowrap ml-2 ${saving ? 'text-primary animate-pulse drop-shadow-[0_0_5px_rgba(249,115,22,0.5)]' : 'text-muted'}`}>
           {saving ? "Saving" : "Saved"}
         </span>
       </div>
@@ -78,7 +78,7 @@ export default function UnifiedHeader({
             onClick={onTogglePreview}
             className={`border-none rounded-full px-3 py-1 text-[11px] font-sans font-medium cursor-pointer transition-all duration-150 ${
               preview
-                ? 'bg-primary text-white shadow-[0_0_10px_rgba(99,102,241,0.5)]'
+                ? 'bg-primary text-white shadow-[0_0_10px_rgba(249,115,22,0.5)]'
                 : 'bg-transparent text-muted hover:bg-white/10 hover:text-foreground'
             }`}
           >
@@ -88,7 +88,7 @@ export default function UnifiedHeader({
             onClick={onToggleVersions}
             className={`border-none rounded-full px-3 py-1 text-[11px] font-sans font-medium cursor-pointer transition-all duration-150 ${
               showVersions
-                ? 'bg-primary text-white shadow-[0_0_10px_rgba(99,102,241,0.5)]'
+                ? 'bg-primary text-white shadow-[0_0_10px_rgba(249,115,22,0.5)]'
                 : 'bg-transparent text-muted hover:bg-white/10 hover:text-foreground'
             }`}
           >
@@ -137,7 +137,7 @@ export default function UnifiedHeader({
 
         <button
           onClick={onShare}
-          className="glow-border relative bg-primary text-white border-none rounded-full px-4 py-1.5 text-xs font-sans font-medium cursor-pointer hover:bg-primary-hover shadow-[0_0_15px_rgba(99,102,241,0.4)] transition-all duration-200 overflow-hidden"
+          className="glow-border relative bg-primary text-white border-none rounded-full px-4 py-1.5 text-xs font-sans font-medium cursor-pointer hover:bg-primary-hover shadow-[0_0_15px_rgba(249,115,22,0.4)] transition-all duration-200 overflow-hidden"
         >
           <span className="relative z-10">Share</span>
         </button>

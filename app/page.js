@@ -66,8 +66,8 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-background text-foreground font-sans relative overflow-hidden transition-colors duration-300">
       {/* Background decorations */}
-      <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-br from-primary/30 via-blue-500/20 to-transparent rounded-full blur-[100px] opacity-70 -z-10 animate-pulse pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-20%] w-[600px] h-[600px] bg-gradient-to-tr from-green-500/20 to-transparent rounded-full blur-[100px] opacity-50 -z-10 pointer-events-none" />
+      <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-br from-primary/30 via-orange-500/10 to-transparent rounded-full blur-[100px] opacity-70 -z-10 animate-pulse pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-20%] w-[600px] h-[600px] bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-[100px] opacity-50 -z-10 pointer-events-none" />
 
       {/* Header */}
       <header className={`flex justify-between items-center px-8 md:px-12 py-4 sticky top-0 z-50 transition-all duration-300 ${
@@ -189,10 +189,10 @@ export default function HomePage() {
 
       {/* Bento Grid Features */}
       <section id="features" className="max-w-6xl mx-auto px-6 py-24">
-        <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Feature 1 - Large */}
-          <div className="md:col-span-2 md:row-span-2 glass-panel rounded-3xl p-10 flex flex-col justify-end group hover:border-blue-500/40 transition-colors min-h-[400px] relative overflow-hidden">
-            <div className="absolute top-8 right-8 w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-500">
+          <div className="glass-panel rounded-3xl p-10 flex flex-col justify-between group hover:border-primary/40 transition-colors min-h-[400px] relative overflow-hidden">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-500">
               <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">⚡</span>
             </div>
             <div>
@@ -200,141 +200,65 @@ export default function HomePage() {
               <p className="text-lg text-muted leading-relaxed font-sans max-w-sm">Every keystroke propagated instantly across all collaborators with zero latency via Yjs CRDTs.</p>
             </div>
           </div>
-          {/* Feature 2 - Top Right */}
-          <div className="md:col-span-2 md:row-span-1 glass-panel rounded-3xl p-8 flex flex-col justify-end group hover:border-orange-500/40 transition-colors min-h-[200px] relative overflow-hidden">
-            <div className="absolute top-6 right-6 w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-500">
-              <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">✨</span>
-            </div>
-            <div>
-              <h3 className="text-2xl font-sans font-bold mb-2 text-foreground tracking-tight">Live cursors</h3>
-              <p className="text-sm text-muted leading-relaxed font-sans max-w-xs">See exactly where your teammates are writing in real time, making pair writing seamless.</p>
-            </div>
-          </div>
-          {/* Feature 3 - Bottom Right */}
-          <div className="md:col-span-2 md:row-span-1 glass-panel rounded-3xl p-8 flex flex-col justify-end group hover:border-green-500/40 transition-colors min-h-[200px] relative overflow-hidden">
-            <div className="absolute top-6 right-6 w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-500">
-              <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">📝</span>
-            </div>
-            <div>
-              <h3 className="text-2xl font-sans font-bold mb-2 text-foreground tracking-tight">Markdown support</h3>
-              <p className="text-sm text-muted leading-relaxed font-sans max-w-xs">Write seamlessly with familiar markdown syntax and see the results instantly.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* How it works */}
-      <section className="max-w-3xl mx-auto px-6 py-20">
-        <p className="text-xs font-sans text-primary tracking-widest uppercase font-medium text-center mb-3">
-          How it works
-        </p>
-        <h2 className="text-3xl md:text-4xl font-sans font-bold text-center mb-14 tracking-tight">
-          Simple. Powerful. Collaborative.
-        </h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {STEPS.map((s) => (
-            <div key={s.step} className="text-center group">
-              <div className={`w-12 h-12 rounded-full border flex items-center justify-center mx-auto mb-4 font-sans font-bold text-lg group-hover:text-white transition-all duration-300 ${s.color}`}>
-                {s.step}
-              </div>
-              <h4 className="font-sans font-semibold text-foreground text-lg mb-2">{s.title}</h4>
-              <p className="text-sm text-muted font-sans">{s.desc}</p>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Testimonials */}
-      <section className="max-w-6xl mx-auto px-6 py-20 relative">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-primary/5 blur-[120px] -z-10 rounded-full" />
-        <h2 className="text-3xl md:text-4xl font-sans font-bold text-center mb-16 tracking-tight">
-          Loved by engineering teams.
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {TESTIMONIALS.map((t, i) => (
-            <div key={i} className="glass-panel rounded-2xl p-8 flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
-              <p className="text-muted font-sans leading-relaxed mb-8">"{t.quote}"</p>
-              <div>
-                <p className="font-sans font-bold text-foreground">{t.name}</p>
-                <p className="text-xs text-muted font-sans uppercase tracking-wider mt-1">{t.role}</p>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Built for Engineering */}
-      <section className="max-w-6xl mx-auto px-6 py-24 mb-10">
-        <div className="glass-panel rounded-3xl p-12 md:p-20 relative overflow-hidden text-center">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[80px] rounded-full" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full" />
           
-          <div className="relative z-10">
-            <p className="text-xs font-sans text-primary tracking-widest uppercase font-bold mb-4">
-              Developer First
-            </p>
-            <h2 className="text-4xl md:text-5xl font-sans font-bold mb-6 tracking-tight">
-              Built on a modern stack.
-            </h2>
-            <p className="text-lg text-muted font-sans max-w-2xl mx-auto mb-16">
-              CollabDocs leverages state-of-the-art technologies to ensure zero-latency collaboration and complete data integrity.
-            </p>
-            
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
-                { name: "Next.js 14", desc: "App Router & Server Components" },
-                { name: "Yjs CRDT", desc: "Zero-conflict resolution" },
-                { name: "Liveblocks", desc: "WebSocket infrastructure" },
-                { name: "Convex", desc: "Real-time database" },
-              ].map((tech) => (
-                <div key={tech.name} className="glow-border bg-card/40 backdrop-blur-sm border border-border/50 p-6 rounded-2xl hover:bg-card/80 transition-colors text-left">
-                  <h4 className="font-sans font-bold text-lg text-foreground mb-2">{tech.name}</h4>
-                  <p className="text-sm text-muted font-sans">{tech.desc}</p>
-                </div>
-              ))}
+          <div className="grid grid-cols-1 gap-8">
+            {/* Feature 2 */}
+            <div className="glass-panel rounded-3xl p-8 flex flex-col justify-between group hover:border-primary/40 transition-colors relative overflow-hidden">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-500">
+                <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">✨</span>
+              </div>
+              <div className="mt-6">
+                <h3 className="text-2xl font-sans font-bold mb-2 text-foreground tracking-tight">Live cursors</h3>
+                <p className="text-sm text-muted leading-relaxed font-sans max-w-xs">See exactly where your teammates are writing in real time, making pair writing seamless.</p>
+              </div>
+            </div>
+            {/* Feature 3 */}
+            <div className="glass-panel rounded-3xl p-8 flex flex-col justify-between group hover:border-primary/40 transition-colors relative overflow-hidden">
+              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-500">
+                <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">📝</span>
+              </div>
+              <div className="mt-6">
+                <h3 className="text-2xl font-sans font-bold mb-2 text-foreground tracking-tight">Markdown support</h3>
+                <p className="text-sm text-muted leading-relaxed font-sans max-w-xs">Write seamlessly with familiar markdown syntax and see the results instantly.</p>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Sign-in Banner Section */}
-      <section className="max-w-5xl mx-auto px-6 py-12 mb-10">
-
-        {/* Get In Touch */}
-        <div className="text-center mt-20 mb-10">
-          <p className="text-xs font-sans text-[#ea580c] font-bold tracking-widest uppercase mb-4">
-            GET IN TOUCH
-          </p>
-          <h3 className="text-3xl font-black text-foreground font-sans tracking-tight mb-3">
-            Have questions or ideas?
-          </h3>
-          <p className="text-muted font-sans mb-8">
-            Open source project — contributions and feedback always welcome.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-            <a 
-              href="https://github.com/shubham37204/collab-editor" 
-              target="_blank" 
-              rel="noreferrer"
-              className="w-full sm:w-auto bg-[#0f172a] text-white border-none px-6 py-3 text-sm font-sans font-bold rounded-xl hover:bg-black transition-colors cursor-pointer flex items-center justify-center gap-2 no-underline"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-              </svg>
-              View on GitHub
-            </a>
-            <a 
-              href="mailto:contact@collabdocs.com"
-              className="w-full sm:w-auto bg-transparent border border-border text-foreground px-6 py-3 text-sm font-sans font-bold rounded-xl hover:border-muted transition-colors cursor-pointer flex items-center justify-center gap-2 no-underline"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <rect x="2" y="4" width="20" height="16" rx="2" />
-                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-              </svg>
-              Send an email
-            </a>
-          </div>
+      {/* Get In Touch */}
+      <section className="max-w-3xl mx-auto px-6 py-24 text-center">
+        <p className="text-xs font-sans text-primary font-bold tracking-widest uppercase mb-4">
+          GET IN TOUCH
+        </p>
+        <h3 className="text-3xl md:text-4xl font-black text-foreground font-sans tracking-tight mb-4">
+          Have questions or ideas?
+        </h3>
+        <p className="text-lg text-muted font-sans mb-10 max-w-lg mx-auto">
+          CollabDocs is an open source project — contributions and feedback are always welcome.
+        </p>
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+          <a 
+            href="https://github.com/shubham37204/collab-editor" 
+            target="_blank" 
+            rel="noreferrer"
+            className="w-full sm:w-auto bg-foreground text-background border-none px-8 py-4 text-base font-sans font-bold rounded-xl hover:opacity-90 transition-all cursor-pointer flex items-center justify-center gap-2 no-underline shadow-lg"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+            </svg>
+            View on GitHub
+          </a>
+          <a 
+            href="mailto:contact@collabdocs.com"
+            className="w-full sm:w-auto bg-transparent border-2 border-border text-foreground px-8 py-3.5 text-base font-sans font-bold rounded-xl hover:border-muted transition-colors cursor-pointer flex items-center justify-center gap-2 no-underline"
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+            </svg>
+            Send an email
+          </a>
         </div>
       </section>
 

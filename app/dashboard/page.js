@@ -100,7 +100,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background text-foreground">
+    <div className="min-h-screen flex flex-col bg-background text-foreground">
       <DashboardHeader
         user={user}
         search={search}
@@ -111,7 +111,7 @@ export default function DashboardPage() {
       />
 
       {/* Main content */}
-      <main className="max-w-6xl mx-auto px-8 py-14 relative z-10">
+      <main className="flex-1 max-w-6xl mx-auto px-8 py-14 relative z-10 w-full">
         <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full -z-10 pointer-events-none" />
         {/* Title row */}
         <div className="flex items-baseline justify-between mb-10">
