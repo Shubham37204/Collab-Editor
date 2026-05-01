@@ -1,10 +1,93 @@
 @import "tailwindcss";
 
-:root {
-  --background: #fafaf8;
-  --foreground: #1a1816;
+@theme {
+  --color-background: var(--bg-color);
+  --color-foreground: var(--fg-color);
+  --color-card: var(--card-color);
+  --color-surface: var(--surface-color);
+  --color-border: var(--border-color);
+  --color-primary: var(--primary-color);
+  --color-primary-hover: var(--primary-hover-color);
+  --color-muted: var(--muted-color);
+  --color-badge: var(--badge-color);
+  --color-background-secondary: var(--bg-secondary-color);
+  --color-danger: var(--danger-color);
+  --color-success: var(--success-color);
+
+  --font-sans: 'Inter', 'Outfit', system-ui, sans-serif;
+  --font-serif: 'Georgia', 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+
+  --animate-fade-in: fade-in 0.3s ease-out forwards;
+  --animate-slide-up: slide-up 0.35s ease-out forwards;
+  --animate-slide-down: slide-down 0.25s ease-out forwards;
+  --animate-scale-in: scale-in 0.2s ease-out forwards;
+  --animate-shimmer: shimmer 1.5s ease-in-out infinite;
+  --animate-pulse-dot: pulse-dot 1s ease-in-out infinite;
 }
 
+:root {
+  --bg-color: #faf9f7;
+  --bg-secondary-color: #f3f1ed;
+  --fg-color: #1c1917;
+  --muted-color: #78716c;
+  --card-color: #ffffff;
+  --surface-color: #f5f3f0;
+  --border-color: #e7e5e4;
+  --primary-color: #7c3aed;
+  --primary-hover-color: #6d28d9;
+  --badge-color: #f0ebe4;
+  --danger-color: #ef4444;
+  --success-color: #16a34a;
+}
+
+.dark {
+  --bg-color: #0c0a09;
+  --bg-secondary-color: #1c1917;
+  --fg-color: #fafaf9;
+  --muted-color: #a8a29e;
+  --card-color: #171412;
+  --surface-color: #1c1917;
+  --border-color: #292524;
+  --primary-color: #a78bfa;
+  --primary-hover-color: #8b5cf6;
+  --badge-color: #1c1917;
+  --danger-color: #f87171;
+  --success-color: #4ade80;
+}
+
+/* ── Keyframes ── */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slide-down {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 0.3; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* ── Base ── */
 * {
   box-sizing: border-box;
 }
@@ -14,6 +97,37 @@ body {
   padding: 0;
 }
 
+/* ── Skeleton loading ── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--badge-color) 25%,
+    var(--surface-color) 50%,
+    var(--badge-color) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+  border-radius: 6px;
+}
+
+/* ── Glassmorphism ── */
+.glass {
+  background: color-mix(in srgb, var(--card-color) 80%, transparent);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* ── Focus rings ── */
+.focus-ring {
+  outline: none;
+}
+.focus-ring:focus-visible {
+  outline: 2px solid var(--primary-color);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ── Liveblocks overlay suppression ── */
 [data-liveblocks-portal],
 [data-liveblocks-overlay],
 .__liveblocks_overlay__,
@@ -21,6 +135,7 @@ body {
   display: none !important;
 }
 
+/* ── CodeMirror ── */
 .cm-editor {
   height: 100%;
   font-size: 14px;
@@ -41,19 +156,18 @@ body {
 }
 
 .cm-gutters {
-  border-right: 1px solid #e8e4de;
+  border-right: 1px solid var(--border-color);
   background: transparent;
   color: #c8c4be;
   font-size: 12px;
 }
 
-/* ── Dark mode CodeMirror gutters ── */
 .dark .cm-gutters {
   border-right: 1px solid #2a2a2a;
   color: #444;
 }
 
-/* ── Scrollbar styling ── */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
@@ -64,59 +178,48 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #d4cfc8;
+  background: var(--border-color);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #b8b0a8;
+  background: var(--muted-color);
 }
 
-/* ── Selection color ── */
+/* ── Selection ── */
 ::selection {
-  background: #b8935a33;
+  background: #f9731633;
   color: inherit;
 }
 
-/* ── Smooth transitions ── */
+/* ── Transitions ── */
 a, button {
   transition: all 0.15s ease;
 }
 
+/* ── Print styles ── */
 @media print {
-
-  /* ── Page size and margins ── */
   @page {
     size: A4;
     margin: 1.5cm 2cm;
   }
 
-  /* ── Force white background everywhere ── */
   html, body {
     background: #fff !important;
     color: #000 !important;
   }
 
-  /* ── Hide ALL UI chrome ── */
   nav,
   header,
   button,
   [data-no-print],
-
-  /* Toolbar */
   [class*="toolbar"],
-
-  /* CodeMirror editor — never print raw markdown */
   .cm-editor,
   .cm-scroller,
   .cm-content,
   .cm-gutters,
   .cm-line,
-
-  /* Status bar */
   [class*="status"],
-
-  /* Liveblocks branding + badge */
   [data-liveblocks-portal],
   [data-liveblocks-overlay],
   [class*="liveblocks"],
@@ -125,7 +228,6 @@ a, button {
     display: none !important;
   }
 
-  /* ── Show ONLY the preview panel ── */
   .preview-content {
     display: block !important;
     position: static !important;
@@ -137,8 +239,6 @@ a, button {
     border: none !important;
     padding: 0 !important;
     margin: 0 !important;
-
-    /* Typography for print */
     font-family: 'Georgia', 'Times New Roman', serif !important;
     font-size: 11pt !important;
     line-height: 1.7 !important;
@@ -146,7 +246,6 @@ a, button {
     background: #fff !important;
   }
 
-  /* ── Markdown element styles for print ── */
   .preview-content h1 {
     font-size: 20pt !important;
     font-weight: 600 !important;
@@ -250,7 +349,6 @@ a, button {
     text-decoration: underline !important;
   }
 
-  /* ── Avoid page breaks inside key elements ── */
   .preview-content h1,
   .preview-content h2,
   .preview-content h3,

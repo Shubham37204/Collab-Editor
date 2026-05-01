@@ -1,5 +1,4 @@
 "use client";
-import { useTheme } from "../app/layout";
 import { useEffect } from "react";
 
 const SHORTCUTS = [
@@ -33,9 +32,6 @@ const SHORTCUTS = [
 ];
 
 export default function ShortcutsModal({ onClose }) {
-  const { theme } = useTheme();
-
-  // Close on Escape
   useEffect(() => {
     const handler = (e) => {
       if (e.key === "Escape") onClose();
@@ -44,137 +40,49 @@ export default function ShortcutsModal({ onClose }) {
     return () => window.removeEventListener("keydown", handler);
   }, [onClose]);
 
-  const Key = ({ children }) => (
-    <kbd
-      style={{
-        background: theme.badge,
-        border: `1px solid ${theme.border}`,
-        borderRadius: "4px",
-        padding: "2px 7px",
-        fontSize: "11px",
-        fontFamily: "monospace",
-        color: theme.text,
-        display: "inline-block",
-      }}
-    >
-      {children}
-    </kbd>
-  );
-
   return (
     <div
-      style={{
-        position: "fixed",
-        inset: 0,
-        background: "rgba(0,0,0,0.5)",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        zIndex: 300,
-      }}
+      className="fixed inset-0 bg-black/50 flex items-center justify-center z-[300] animate-fade-in"
       onClick={(e) => {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div
-        style={{
-          background: theme.card,
-          border: `1px solid ${theme.border}`,
-          borderRadius: "14px",
-          padding: "32px",
-          width: "100%",
-          maxWidth: "480px",
-          maxHeight: "80vh",
-          overflow: "auto",
-        }}
-      >
+      <div className="bg-card border border-border rounded-2xl p-8 w-full max-w-md max-h-[80vh] overflow-auto animate-scale-in">
         {/* Header */}
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            marginBottom: "24px",
-          }}
-        >
-          <h3
-            style={{
-              fontFamily: theme.serif,
-              fontSize: "18px",
-              fontWeight: "400",
-              margin: 0,
-              color: theme.text,
-            }}
-          >
+        <div className="flex justify-between items-center mb-6">
+          <h3 className="font-serif text-lg font-normal m-0 text-foreground">
             Keyboard shortcuts
           </h3>
           <button
             onClick={onClose}
-            style={{
-              background: "none",
-              border: "none",
-              color: theme.muted,
-              fontSize: "18px",
-              cursor: "pointer",
-            }}
+            className="bg-transparent border-none text-muted text-lg cursor-pointer hover:text-foreground transition-colors duration-150"
           >
             ×
           </button>
         </div>
 
-        {/* Shortcut categories */}
+        {/* Categories */}
         {SHORTCUTS.map((group) => (
-          <div key={group.category} style={{ marginBottom: "24px" }}>
-            <p
-              style={{
-                fontSize: "10px",
-                fontFamily: theme.sans,
-                color: theme.accent,
-                letterSpacing: "0.08em",
-                textTransform: "uppercase",
-                fontWeight: "500",
-                marginBottom: "10px",
-              }}
-            >
+          <div key={group.category} className="mb-6">
+            <p className="text-[10px] font-sans text-primary tracking-wider uppercase font-medium mb-2.5">
               {group.category}
             </p>
             {group.items.map((item) => (
               <div
                 key={item.label}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  padding: "7px 0",
-                  borderBottom: `1px solid ${theme.border}`,
-                }}
+                className="flex justify-between items-center py-1.5 border-b border-border"
               >
-                <span
-                  style={{
-                    fontSize: "13px",
-                    fontFamily: theme.sans,
-                    color: theme.text,
-                  }}
-                >
+                <span className="text-sm font-sans text-foreground">
                   {item.label}
                 </span>
-                <div
-                  style={{ display: "flex", gap: "4px", alignItems: "center" }}
-                >
+                <div className="flex gap-1 items-center">
                   {item.keys.map((k, i) => (
-                    <span
-                      key={i}
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: "4px",
-                      }}
-                    >
-                      <Key>{k}</Key>
+                    <span key={i} className="flex items-center gap-1">
+                      <kbd className="bg-badge border border-border rounded px-1.5 py-0.5 text-xs font-mono text-foreground">
+                        {k}
+                      </kbd>
                       {i < item.keys.length - 1 && (
-                        <span style={{ fontSize: "10px", color: theme.muted }}>
-                          +
-                        </span>
+                        <span className="text-[10px] text-muted">+</span>
                       )}
                     </span>
                   ))}

@@ -1,5 +1,4 @@
 'use client'
-import { useTheme } from '../app/layout'
 import { useEffect, useRef } from 'react'
 
 const ACTIONS = [
@@ -12,7 +11,6 @@ const ACTIONS = [
 ]
 
 export default function AIToolbar({ position, onAction, loading, onClose }) {
-  const { theme } = useTheme()
   const ref = useRef(null)
 
   useEffect(() => {
@@ -28,74 +26,35 @@ export default function AIToolbar({ position, onAction, loading, onClose }) {
   return (
     <div
       ref={ref}
+      className="fixed z-[200] flex items-center gap-1 bg-card border border-border rounded-xl px-2 py-1.5 shadow-lg animate-scale-in"
       style={{
-        position: 'fixed',
         top: position.top - 52,
         left: Math.min(position.left, window.innerWidth - 440),
-        zIndex: 200,
-        display: 'flex',
-        alignItems: 'center',
-        gap: '4px',
-        background: theme.card,
-        border: `1px solid ${theme.border}`,
-        borderRadius: '10px',
-        padding: '6px 8px',
-        boxShadow: '0 8px 32px rgba(0,0,0,0.15)',
-        transition: 'opacity 0.15s',
       }}
     >
-      <span style={{
-        fontSize: '11px', color: theme.accent, fontFamily: theme.sans,
-        fontWeight: '500', marginRight: '4px', letterSpacing: '0.2px',
-      }}>
+      <span className="text-xs text-primary font-sans font-medium mr-1 tracking-wide">
         ✦ AI
       </span>
 
-      <div style={{ width: '1px', height: '16px', background: theme.border, marginRight: '4px' }} />
+      <div className="w-px h-4 bg-border mr-1" />
 
       {loading ? (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '2px 8px' }}>
-          {/* Animated dots */}
-          {[0, 1, 2].map(i => (
-            <div key={i} style={{
-              width: '5px', height: '5px', borderRadius: '50%',
-              background: theme.accent,
-              animation: `pulse 1s ease-in-out ${i * 0.2}s infinite`,
-            }} />
+        <div className="flex items-center gap-2 px-2">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse-dot"
+              style={{ animationDelay: `${i * 0.2}s` }}
+            />
           ))}
-          <style>{`
-            @keyframes pulse {
-              0%, 100% { opacity: 0.3; transform: scale(0.8); }
-              50% { opacity: 1; transform: scale(1.1); }
-            }
-          `}</style>
         </div>
       ) : (
-        ACTIONS.map(action => (
+        ACTIONS.map((action) => (
           <button
             key={action.id}
             title={action.title}
             onClick={() => onAction(action.id)}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: theme.muted,
-              fontSize: '12px',
-              fontFamily: theme.sans,
-              padding: '4px 8px',
-              borderRadius: '6px',
-              cursor: 'pointer',
-              whiteSpace: 'nowrap',
-              transition: 'all 0.12s',
-            }}
-            onMouseEnter={e => {
-              e.target.style.background = theme.badge
-              e.target.style.color = theme.text
-            }}
-            onMouseLeave={e => {
-              e.target.style.background = 'none'
-              e.target.style.color = theme.muted
-            }}
+            className="bg-transparent border-none text-muted text-xs font-sans px-2 py-1 rounded-md cursor-pointer whitespace-nowrap hover:bg-badge hover:text-foreground transition-all duration-150"
           >
             {action.label}
           </button>

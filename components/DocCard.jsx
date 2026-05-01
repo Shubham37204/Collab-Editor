@@ -1,10 +1,7 @@
 'use client'
-import { useTheme } from '../app/layout'
 import { useState } from 'react'
 
 export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
-  const { theme } = useTheme()
-  const [hovered, setHovered] = useState(false)
   const [deleting, setDeleting] = useState(false)
 
   const handleDelete = async (e) => {
@@ -16,7 +13,6 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
   const handleStar  = (e) => { e.stopPropagation(); onStar() }
   const handleShare = (e) => { e.stopPropagation(); onShare() }
 
-  //FEATURE 4 Word count
   const wordCount = doc.content
     ? doc.content.trim().split(/\s+/).filter(Boolean).length
     : 0
@@ -24,117 +20,83 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
   return (
     <div
       onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        background: hovered ? theme.card : 'transparent',
-        border: `1px solid ${hovered ? theme.accent + '50' : theme.border}`,
-        borderRadius: '8px',
-        padding: '14px 20px',
-        cursor: 'pointer',
-        transition: 'all 0.18s ease',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        transform: hovered ? 'translateX(3px)' : 'none',
-      }}
+      className="group flex items-center justify-between rounded-xl px-5 py-4 cursor-pointer transition-all duration-300 border border-border/60 bg-card/30 hover:border-primary/40 hover:bg-card hover:shadow-md hover:-translate-y-0.5"
     >
       {/* Left */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-
+      <div className="flex items-center gap-3.5">
         {/* Doc icon */}
-        <div style={{
-          width: '36px', height: '36px', borderRadius: '6px',
-          background: theme.accent + '18',
-          border: `1px solid ${theme.accent + '33'}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          flexShrink: 0,
-        }}>
+        <div className="w-9 h-9 rounded-md bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
           <svg width="16" height="18" viewBox="0 0 16 18" fill="none">
             <rect x="1" y="1" width="10" height="14" rx="2"
-              stroke={theme.accent} strokeWidth="1.2"/>
+              stroke="currentColor" className="text-primary" strokeWidth="1.2"/>
             <path d="M4 5h6M4 8h6M4 11h4"
-              stroke={theme.accent} strokeWidth="1.2" strokeLinecap="round"/>
+              stroke="currentColor" className="text-primary" strokeWidth="1.2" strokeLinecap="round"/>
           </svg>
         </div>
 
         <div>
           {/* Title row */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-            <h3 style={{
-              fontFamily: theme.serif, fontSize: '15px',
-              fontWeight: '400', color: theme.text, margin: 0,
-            }}>
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="font-sans text-base font-medium text-foreground tracking-tight m-0">
               {doc.title}
             </h3>
 
-            {/*FEATURE 2 Starred */}
+            {/* Starred */}
             {doc.starred && (
-              <span style={{ color: theme.accent, fontSize: '13px', lineHeight: 1 }}>★</span>
+              <span className="text-primary text-sm leading-none">★</span>
             )}
 
-            {/* [FEATURE 3] Shared badge */}
+            {/* Shared badge */}
             {doc.collaborators?.length > 0 && (
-              <span style={{
-                fontSize: '10px', background: theme.accent + '18',
-                color: theme.accent, padding: '2px 7px',
-                borderRadius: '10px', fontFamily: theme.sans, letterSpacing: '0.2px',
-              }}>
+              <span className="text-[10px] bg-primary/10 text-primary py-0.5 px-2 rounded-full font-sans tracking-wide">
                 👥 shared
               </span>
             )}
           </div>
 
-          {/*FEATURE 4 Date + word count */}
-          <p style={{
-            fontSize: '12px', color: theme.muted,
-            fontFamily: theme.sans, margin: 0,
-          }}>
+          {/* Date + word count */}
+          <p className="text-xs text-muted font-sans m-0">
             {new Date(doc._creationTime).toLocaleDateString('en-US', {
               month: 'long', day: 'numeric', year: 'numeric',
             })}
-            <span style={{ margin: '0 6px', opacity: 0.4 }}>·</span>
+            <span className="mx-1.5 opacity-40">·</span>
             {wordCount} {wordCount === 1 ? 'word' : 'words'}
           </p>
         </div>
       </div>
 
-      {/* FEATURE 1 Hover actions */}
-      {hovered && (
-        <div
-          style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}
-          onClick={e => e.stopPropagation()}
+      {/* Hover actions */}
+      <div
+        className="flex gap-1.5 items-center shrink-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Star */}
+        <button
+          onClick={handleStar}
+          className={`bg-transparent border border-border rounded-md px-2.5 py-1 text-sm cursor-pointer transition-all duration-150 hover:bg-badge ${
+            doc.starred ? 'text-primary border-primary/40' : 'text-muted'
+          }`}
         >
-          {/* Star */}
-          <button onClick={handleStar} style={{
-            background: 'none', border: `1px solid ${theme.border}`,
-            color: doc.starred ? theme.accent : theme.muted,
-            borderRadius: '6px', padding: '4px 10px', fontSize: '13px',
-            cursor: 'pointer', transition: 'all 0.15s',
-          }}>
-            {doc.starred ? '★' : '☆'}
-          </button>
+          {doc.starred ? '★' : '☆'}
+        </button>
 
-          {/* Share */}
-          <button onClick={handleShare} style={{
-            background: 'none', border: `1px solid ${theme.border}`,
-            color: theme.muted, borderRadius: '6px', padding: '4px 10px',
-            fontSize: '12px', fontFamily: theme.sans, cursor: 'pointer',
-          }}>
-            Share
-          </button>
+        {/* Share */}
+        <button
+          onClick={handleShare}
+          className="bg-transparent border border-border text-muted rounded-md px-2.5 py-1 text-xs font-sans cursor-pointer hover:bg-badge hover:text-foreground transition-all duration-150"
+        >
+          Share
+        </button>
 
-          {/* Delete */}
-          <button onClick={handleDelete} style={{
-            background: 'none', border: '1px solid #e8555544',
-            color: '#e85555', borderRadius: '6px', padding: '4px 10px',
-            fontSize: '12px', fontFamily: theme.sans, cursor: 'pointer',
-            opacity: deleting ? 0.4 : 1,
-          }}>
-            {deleting ? '...' : 'Delete'}
-          </button>
-        </div>
-      )}
+        {/* Delete */}
+        <button
+          onClick={handleDelete}
+          className="bg-transparent border border-danger/30 text-danger rounded-md px-2.5 py-1 text-xs font-sans cursor-pointer hover:bg-danger/10 transition-all duration-150 disabled:opacity-40"
+          disabled={deleting}
+        >
+          {deleting ? '...' : 'Delete'}
+        </button>
+      </div>
     </div>
   )
 }

@@ -3,25 +3,35 @@ import { useUser, UserButton } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
-import { useState, useEffect, useRef } from "react";
-import { useTheme } from "../layout";
+import { useState, useEffect } from "react";
+import DashboardHeader from "../../components/dashboard/DashboardHeader";
+import CreateDocModal from "../../components/dashboard/CreateDocModal";
+import ShareDocModal from "../../components/dashboard/ShareDocModal";
+import EmptyState from "../../components/dashboard/EmptyState";
 import DocCard from "../../components/DocCard";
+
+/* ── Skeleton loader ── */
+function DocCardSkeleton() {
+  return (
+    <div className="flex items-center gap-4 p-4 rounded-lg border border-border">
+      <div className="skeleton w-9 h-9 rounded-md shrink-0" />
+      <div className="flex-1 space-y-2">
+        <div className="skeleton h-4 w-2/5 rounded" />
+        <div className="skeleton h-3 w-1/3 rounded" />
+      </div>
+    </div>
+  );
+}
 
 export default function DashboardPage() {
   const { isLoaded, isSignedIn, user } = useUser();
   const router = useRouter();
-  const { theme, dark, setDark } = useTheme();
-  const notifRef = useRef(null);
 
   const [showModal, setShowModal] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
   const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState("");
-  const [showNotifs, setShowNotifs] = useState(false);
   const [showShare, setShowShare] = useState(false);
   const [shareDocId, setShareDocId] = useState(null);
-  const [shareEmail, setShareEmail] = useState("");
-  const [shareRole, setShareRole] = useState("editor");
 
   const docs = useQuery(api.documents.getMyDocs, { ownerId: user?.id ?? "" });
   const notifications = useQuery(api.notifications.getMyNotifications, {
@@ -37,26 +47,17 @@ export default function DashboardPage() {
     if (isLoaded && !isSignedIn) router.push("/");
   }, [isLoaded, isSignedIn, router]);
 
-  useEffect(() => {
-    const handler = (e) => {
-      if (notifRef.current && !notifRef.current.contains(e.target)) {
-        setShowNotifs(false);
-      }
-    };
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
-  }, []);
-
-  const handleCreateDoc = async () => {
+  /* ── Handlers ── */
+  const handleCreateDoc = async (title, templateContent) => {
     setCreating(true);
-    const title = newTitle.trim() || "Untitled Document";
+    const docTitle = title.trim() || "Untitled Document";
     const docId = await createDoc({
-      title,
+      title: docTitle,
       ownerId: user.id,
       ownerName: user.fullName,
+      content: templateContent || "",
     });
     setShowModal(false);
-    setNewTitle("");
     setCreating(false);
     router.push(`/editor/${docId}`);
   };
@@ -64,23 +65,22 @@ export default function DashboardPage() {
   const handleDelete = async (docId) => await deleteDoc({ id: docId });
   const handleToggleStar = async (docId) => await toggleStar({ id: docId });
 
-  const handleShare = async () => {
-    if (!shareEmail.trim()) return;
+  const handleShare = async (email, role) => {
+    if (!email.trim()) return;
     await addCollab({
       docId: shareDocId,
-      userId: shareEmail,
-      email: shareEmail,
-      name: shareEmail,
-      role: shareRole,
+      userId: email,
+      email,
+      name: email,
+      role,
     });
-    setShareEmail("");
   };
 
-  const handleBellClick = () => {
-    setShowNotifs((v) => !v);
-    if (!showNotifs && user?.id) markAllRead({ userId: user.id });
+  const handleMarkAllRead = () => {
+    if (user?.id) markAllRead({ userId: user.id });
   };
 
+  /* ── Derived data ── */
   const filteredDocs =
     docs
       ?.filter((d) => d.title.toLowerCase().includes(search.toLowerCase()))
@@ -89,448 +89,60 @@ export default function DashboardPage() {
   const unreadCount = notifications?.filter((n) => !n.read).length ?? 0;
   const shareDoc = docs?.find((d) => d._id === shareDocId);
 
-  if (!isLoaded)
+  /* ── Loading state ── */
+  if (!isLoaded) {
     return (
-      <div
-        style={{
-          minHeight: "100vh",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          background: theme.bg,
-          display: "flex",
-          flexDirection: "column",
-        }}
-      >
-        <span
-          style={{
-            fontSize: "13px",
-            color: theme.muted,
-            fontFamily: theme.sans,
-          }}
-        >
-          Loading...
-        </span>
+      <div className="min-h-screen flex flex-col items-center justify-center bg-background">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        <span className="text-sm text-muted font-sans mt-3">Loading...</span>
       </div>
     );
-
-  const ghostBtn = {
-    background: "none",
-    border: "none",
-    cursor: "pointer",
-    color: theme.muted,
-    fontFamily: theme.sans,
-    fontSize: "13px",
-    padding: "4px 8px",
-    borderRadius: "6px",
-    transition: "color 0.15s",
-  };
-
-  const inputStyle = {
-    background: theme.badge,
-    border: `1px solid ${theme.border}`,
-    color: theme.text,
-    fontFamily: theme.sans,
-    fontSize: "13px",
-    outline: "none",
-    borderRadius: "20px",
-    padding: "7px 16px",
-  };
-
-  const modalInput = {
-    width: "100%",
-    padding: "11px 14px",
-    borderRadius: "6px",
-    border: `1px solid ${theme.border}`,
-    background: theme.bg,
-    color: theme.text,
-    fontFamily: theme.sans,
-    fontSize: "14px",
-    outline: "none",
-    boxSizing: "border-box",
-    transition: "border 0.15s",
-  };
-
-  const accentBtn = {
-    background: theme.accent,
-    color: "#fff",
-    border: "none",
-    padding: "9px 20px",
-    borderRadius: "6px",
-    fontFamily: theme.sans,
-    fontSize: "13px",
-    cursor: "pointer",
-    transition: "opacity 0.15s",
-  };
-
-  const cancelBtn = {
-    background: theme.badge,
-    color: theme.text,
-    border: `1px solid ${theme.border}`,
-    padding: "9px 20px",
-    borderRadius: "6px",
-    fontFamily: theme.sans,
-    fontSize: "13px",
-    cursor: "pointer",
-  };
+  }
 
   return (
-    <div
-      style={{ minHeight: "100vh", background: theme.bg, color: theme.text }}
-    >
-      <header
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "14px 48px",
-          borderBottom: `1px solid ${theme.border}`,
-          background: theme.bg,
-          position: "sticky",
-          top: 0,
-          zIndex: 20,
-          transition: "background 0.3s",
-        }}
-      >
-        {/* Logo */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "10px",
-            cursor: "pointer",
-          }}
-          onClick={() => router.push("/")}
-        >
-          <svg width="26" height="26" viewBox="0 0 28 28" fill="none">
-            <rect
-              x="4"
-              y="2"
-              width="16"
-              height="20"
-              rx="3"
-              fill={theme.accent + "33"}
-              stroke={theme.accent}
-              strokeWidth="1.5"
-            />
-            <path
-              d="M8 8h8M8 12h8M8 16h5"
-              stroke={theme.accent}
-              strokeWidth="1.5"
-              strokeLinecap="round"
-            />
-            <circle cx="21" cy="21" r="5" fill={theme.accent} />
-            <path
-              d="M19.5 21.5l1 1 2-2"
-              stroke="#fff"
-              strokeWidth="1.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-          <span
-            style={{
-              fontFamily: theme.serif,
-              fontWeight: "700",
-              fontSize: "17px",
-              color: theme.text,
-            }}
-          >
-            CollabDocs
-          </span>
-        </div>
+    <div className="min-h-screen bg-background text-foreground">
+      <DashboardHeader
+        user={user}
+        search={search}
+        onSearchChange={setSearch}
+        notifications={notifications}
+        unreadCount={unreadCount}
+        onMarkAllRead={handleMarkAllRead}
+      />
 
-        {/* Right controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-          {/* [FEATURE 3] Search */}
-          <input
-            style={{ ...inputStyle, width: "210px" }}
-            placeholder="Search documents..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-
-          {/* [FEATURE 2] Notification bell */}
-          <div ref={notifRef} style={{ position: "relative" }}>
-            <button
-              onClick={handleBellClick}
-              style={{
-                ...ghostBtn,
-                position: "relative",
-                padding: "6px 8px",
-                border: `1px solid ${theme.border}`,
-                borderRadius: "8px",
-                background: showNotifs ? theme.badge : "transparent",
-              }}
-            >
-              <span style={{ fontSize: "16px" }}>🔔</span>
-              {unreadCount > 0 && (
-                <span
-                  style={{
-                    position: "absolute",
-                    top: "2px",
-                    right: "2px",
-                    background: "#e85555",
-                    color: "#fff",
-                    fontSize: "9px",
-                    fontWeight: "700",
-                    width: "14px",
-                    height: "14px",
-                    borderRadius: "50%",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </button>
-
-            {/* Notification dropdown */}
-            {showNotifs && (
-              <div
-                style={{
-                  position: "absolute",
-                  right: 0,
-                  top: "44px",
-                  background: theme.card,
-                  border: `1px solid ${theme.border}`,
-                  borderRadius: "10px",
-                  width: "300px",
-                  maxHeight: "360px",
-                  overflow: "auto",
-                  zIndex: 100,
-                  boxShadow: "0 8px 32px rgba(0,0,0,0.12)",
-                }}
-              >
-                <div
-                  style={{
-                    padding: "12px 16px",
-                    borderBottom: `1px solid ${theme.border}`,
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "13px",
-                      fontWeight: "500",
-                      color: theme.text,
-                      fontFamily: theme.sans,
-                    }}
-                  >
-                    Notifications
-                  </span>
-                  {unreadCount > 0 && (
-                    <span
-                      style={{
-                        fontSize: "11px",
-                        color: theme.accent,
-                        fontFamily: theme.sans,
-                      }}
-                    >
-                      {unreadCount} unread
-                    </span>
-                  )}
-                </div>
-
-                {!notifications || notifications.length === 0 ? (
-                  <div
-                    style={{
-                      padding: "24px 16px",
-                      textAlign: "center",
-                      color: theme.muted,
-                      fontSize: "13px",
-                      fontFamily: theme.sans,
-                    }}
-                  >
-                    No notifications yet
-                  </div>
-                ) : (
-                  notifications.map((n) => (
-                    <div
-                      key={n._id}
-                      onClick={() => {
-                        router.push(`/editor/${n.docId}`);
-                        setShowNotifs(false);
-                      }}
-                      style={{
-                        padding: "12px 16px",
-                        background: n.read
-                          ? "transparent"
-                          : theme.accent + "11",
-                        borderBottom: `1px solid ${theme.border}`,
-                        cursor: "pointer",
-                        transition: "background 0.15s",
-                      }}
-                    >
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: "13px",
-                          color: theme.text,
-                          fontFamily: theme.sans,
-                        }}
-                      >
-                        {n.message}
-                      </p>
-                      <p
-                        style={{
-                          margin: "3px 0 0",
-                          fontSize: "11px",
-                          color: theme.muted,
-                          fontFamily: theme.sans,
-                        }}
-                      >
-                        {n.docTitle}
-                      </p>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Theme toggle */}
-          <button
-            onClick={() => setDark(!dark)}
-            style={{
-              ...ghostBtn,
-              border: `1px solid ${theme.border}`,
-              borderRadius: "20px",
-              padding: "6px 14px",
-            }}
-          >
-            {dark ? "☀ Light" : "☾ Dark"}
-          </button>
-
-          <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-            <span
-              style={{
-                fontSize: "13px",
-                color: theme.muted,
-                fontFamily: theme.sans,
-              }}
-            >
-              {user?.firstName}
-            </span>
-            <UserButton afterSignOutUrl="/" />
-          </div>
-        </div>
-      </header>
-
-      {/*  Main content*/}
-      <main
-        style={{
-          maxWidth: "860px",
-          margin: "0 auto",
-          padding: "56px 32px",
-          flex: 1,
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            alignItems: "baseline",
-            justifyContent: "space-between",
-            marginBottom: "40px",
-          }}
-        >
-          <h2
-            style={{
-              fontFamily: theme.serif,
-              fontSize: "32px",
-              fontWeight: "400",
-              margin: 0,
-            }}
-          >
-            My Documents
-          </h2>
+      {/* Main content */}
+      <main className="max-w-3xl mx-auto px-8 py-14">
+        {/* Title row */}
+        <div className="flex items-baseline justify-between mb-10">
+          <h2 className="font-sans text-3xl font-semibold tracking-tight m-0 text-foreground">My Documents</h2>
           {docs && docs.length > 0 && (
-            <button onClick={() => setShowModal(true)} style={accentBtn}>
+            <button
+              onClick={() => setShowModal(true)}
+              className="bg-primary text-white border-none py-2 px-5 rounded-lg font-sans text-sm font-medium cursor-pointer hover:bg-primary-hover transition-all duration-200 shadow-md hover:shadow-lg hover:-translate-y-0.5"
+            >
               + New document
             </button>
           )}
         </div>
 
-        {/* Doc list */}
+        {/* Document list */}
         {docs === undefined ? (
-          <p
-            style={{
-              color: theme.muted,
-              fontFamily: theme.sans,
-              fontSize: "14px",
-            }}
-          >
-            Loading documents...
-          </p>
+          /* Skeleton loading */
+          <div className="space-y-2 animate-fade-in">
+            {[...Array(4)].map((_, i) => (
+              <DocCardSkeleton key={i} />
+            ))}
+          </div>
         ) : filteredDocs.length === 0 && search ? (
-          <div style={{ textAlign: "center", marginTop: "60px" }}>
-            <p
-              style={{
-                color: theme.muted,
-                fontFamily: theme.sans,
-                fontSize: "14px",
-              }}
-            >
-              No documents matching <strong>{search}</strong>
+          <div className="text-center mt-16 animate-fade-in">
+            <p className="text-muted font-sans text-sm">
+              No documents matching <strong className="text-foreground">{search}</strong>
             </p>
           </div>
         ) : filteredDocs.length === 0 ? (
-          /* [FEATURE 8] Empty state */
-          <div style={{ textAlign: "center", marginTop: "100px" }}>
-            <svg
-              width="48"
-              height="48"
-              viewBox="0 0 28 28"
-              fill="none"
-              style={{ margin: "0 auto 20px", display: "block", opacity: 0.3 }}
-            >
-              <rect
-                x="4"
-                y="2"
-                width="16"
-                height="20"
-                rx="3"
-                stroke={theme.text}
-                strokeWidth="1.5"
-              />
-              <path
-                d="M8 8h8M8 12h8M8 16h5"
-                stroke={theme.text}
-                strokeWidth="1.5"
-                strokeLinecap="round"
-              />
-            </svg>
-            <h3
-              style={{
-                fontFamily: theme.serif,
-                fontSize: "22px",
-                fontWeight: "400",
-                marginBottom: "8px",
-                color: theme.text,
-              }}
-            >
-              No documents yet.
-            </h3>
-            <p
-              style={{
-                color: theme.muted,
-                fontSize: "14px",
-                fontFamily: theme.sans,
-                marginBottom: "24px",
-              }}
-            >
-              Create your first document to get started.
-            </p>
-            <button onClick={() => setShowModal(true)} style={accentBtn}>
-              + New document
-            </button>
-          </div>
+          <EmptyState onCreateNew={() => setShowModal(true)} />
         ) : (
-          <div style={{ display: "grid", gap: "4px" }}>
+          <div className="grid gap-1 animate-fade-in">
             {filteredDocs.map((doc) => (
               <DocCard
                 key={doc._id}
@@ -548,342 +160,21 @@ export default function DashboardPage() {
         )}
       </main>
 
-      {showModal && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.45)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 50,
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) {
-              setShowModal(false);
-              setNewTitle("");
-            }
-          }}
-        >
-          <div
-            style={{
-              background: theme.card,
-              border: `1px solid ${theme.border}`,
-              borderRadius: "14px",
-              padding: "32px",
-              width: "100%",
-              maxWidth: "420px",
-            }}
-          >
-            <h3
-              style={{
-                fontFamily: theme.serif,
-                fontSize: "20px",
-                fontWeight: "400",
-                marginBottom: "20px",
-                color: theme.text,
-              }}
-            >
-              New document
-            </h3>
-            <input
-              value={newTitle}
-              onChange={(e) => setNewTitle(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && handleCreateDoc()}
-              placeholder="Document title..."
-              style={modalInput}
-              autoFocus
-            />
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-end",
-                gap: "10px",
-                marginTop: "20px",
-              }}
-            >
-              <button
-                onClick={() => {
-                  setShowModal(false);
-                  setNewTitle("");
-                }}
-                style={cancelBtn}
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleCreateDoc}
-                disabled={creating}
-                style={{
-                  ...accentBtn,
-                  opacity: creating ? 0.65 : 1,
-                  cursor: creating ? "not-allowed" : "pointer",
-                }}
-              >
-                {creating ? "Creating..." : "Create"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Modals */}
+      <CreateDocModal
+        open={showModal}
+        onClose={() => setShowModal(false)}
+        onCreate={handleCreateDoc}
+        creating={creating}
+      />
 
-      {showShare && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0,0,0,0.45)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 50,
-          }}
-          onClick={(e) => {
-            if (e.target === e.currentTarget) setShowShare(false);
-          }}
-        >
-          <div
-            style={{
-              background: theme.card,
-              border: `1px solid ${theme.border}`,
-              borderRadius: "14px",
-              padding: "32px",
-              width: "100%",
-              maxWidth: "460px",
-            }}
-          >
-            {/* Header + close */}
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "flex-start",
-                marginBottom: "6px",
-              }}
-            >
-              <div>
-                <h3
-                  style={{
-                    fontFamily: theme.serif,
-                    fontSize: "18px",
-                    fontWeight: "400",
-                    margin: 0,
-                    color: theme.text,
-                  }}
-                >
-                  Manage who can view this document
-                </h3>
-                <p
-                  style={{
-                    fontFamily: theme.sans,
-                    fontSize: "12px",
-                    color: theme.muted,
-                    margin: "4px 0 0",
-                  }}
-                >
-                  Invite collaborators by email
-                </p>
-              </div>
-              <button
-                onClick={() => setShowShare(false)}
-                style={{ ...ghostBtn, fontSize: "18px", padding: "2px 8px" }}
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Invite row */}
-            <div
-              style={{
-                display: "flex",
-                gap: "8px",
-                marginTop: "20px",
-                marginBottom: "20px",
-              }}
-            >
-              <input
-                value={shareEmail}
-                onChange={(e) => setShareEmail(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleShare()}
-                placeholder="Enter email address"
-                style={{ ...modalInput, flex: 1 }}
-              />
-              {/* Role selector */}
-              <select
-                value={shareRole}
-                onChange={(e) => setShareRole(e.target.value)}
-                style={{
-                  background: theme.badge,
-                  border: `1px solid ${theme.border}`,
-                  color: theme.text,
-                  fontFamily: theme.sans,
-                  fontSize: "12px",
-                  borderRadius: "6px",
-                  padding: "0 10px",
-                  cursor: "pointer",
-                  outline: "none",
-                }}
-              >
-                <option value="editor">can edit</option>
-                <option value="viewer">can view</option>
-              </select>
-              <button
-                onClick={handleShare}
-                style={{
-                  ...accentBtn,
-                  padding: "9px 16px",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Invite
-              </button>
-            </div>
-
-            {/* Collaborator list */}
-            <div
-              style={{
-                borderTop: `1px solid ${theme.border}`,
-                paddingTop: "16px",
-              }}
-            >
-              {/* Owner row */}
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  padding: "8px 0",
-                }}
-              >
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "10px" }}
-                >
-                  <div
-                    style={{
-                      width: "32px",
-                      height: "32px",
-                      borderRadius: "50%",
-                      background: theme.accent + "33",
-                      border: `1px solid ${theme.accent}`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "13px",
-                      color: theme.accent,
-                    }}
-                  >
-                    {user?.firstName?.[0]}
-                  </div>
-                  <div>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: "13px",
-                        fontFamily: theme.sans,
-                        color: theme.text,
-                      }}
-                    >
-                      {user?.fullName}
-                    </p>
-                    <p
-                      style={{
-                        margin: 0,
-                        fontSize: "11px",
-                        fontFamily: theme.sans,
-                        color: theme.muted,
-                      }}
-                    >
-                      {user?.primaryEmailAddress?.emailAddress}
-                    </p>
-                  </div>
-                </div>
-                <span
-                  style={{
-                    fontSize: "11px",
-                    color: theme.muted,
-                    fontFamily: theme.sans,
-                  }}
-                >
-                  Owner
-                </span>
-              </div>
-
-              {/* Other collaborators */}
-              {shareDoc?.collaborators?.map((c, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between",
-                    padding: "8px 0",
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "10px",
-                    }}
-                  >
-                    <div
-                      style={{
-                        width: "32px",
-                        height: "32px",
-                        borderRadius: "50%",
-                        background: theme.badge,
-                        border: `1px solid ${theme.border}`,
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        fontSize: "13px",
-                        color: theme.muted,
-                      }}
-                    >
-                      {c.name?.[0]?.toUpperCase() || "?"}
-                    </div>
-                    <div>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: "13px",
-                          fontFamily: theme.sans,
-                          color: theme.text,
-                        }}
-                      >
-                        {c.name}
-                      </p>
-                      <p
-                        style={{
-                          margin: 0,
-                          fontSize: "11px",
-                          fontFamily: theme.sans,
-                          color: theme.muted,
-                        }}
-                      >
-                        {c.email}
-                      </p>
-                    </div>
-                  </div>
-                  <span
-                    style={{
-                      fontSize: "11px",
-                      padding: "2px 8px",
-                      borderRadius: "10px",
-                      background: theme.accent + "22",
-                      color: theme.accent,
-                      fontFamily: theme.sans,
-                    }}
-                  >
-                    {c.role === "editor" ? "can edit" : "can view"}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
+      <ShareDocModal
+        open={showShare}
+        onClose={() => setShowShare(false)}
+        doc={shareDoc}
+        user={user}
+        onShare={handleShare}
+      />
     </div>
   );
 }

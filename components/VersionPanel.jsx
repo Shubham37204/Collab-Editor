@@ -1,6 +1,5 @@
 "use client";
-import { useTheme } from "../app/layout";
-import { useQuery, useMutation } from "convex/react";
+import { useQuery } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { useState } from "react";
 
@@ -10,9 +9,8 @@ export default function VersionPanel({
   onRestore,
   onClose,
 }) {
-  const { theme } = useTheme();
   const versions = useQuery(api.documents.getVersions, { docId });
-  const [previewing, setPreviewing] = useState(null); // version being previewed
+  const [previewing, setPreviewing] = useState(null);
 
   const timeAgo = (timestamp) => {
     const diff = Date.now() - timestamp;
@@ -27,125 +25,48 @@ export default function VersionPanel({
     });
   };
 
+  const currentWordCount = currentContent.trim().split(/\s+/).filter(Boolean).length;
+
   return (
-    <div
-      style={{
-        width: "260px",
-        borderLeft: `1px solid ${theme.border}`,
-        background: theme.card,
-        display: "flex",
-        flexDirection: "column",
-        flexShrink: 0,
-        height: "100%",
-      }}
-    >
+    <div className="w-[260px] border-l border-border bg-card flex flex-col shrink-0 h-full">
       {/* Header */}
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-          padding: "14px 16px",
-          borderBottom: `1px solid ${theme.border}`,
-        }}
-      >
-        <span
-          style={{
-            fontSize: "13px",
-            fontWeight: "500",
-            color: theme.text,
-            fontFamily: theme.sans,
-          }}
-        >
+      <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
+        <span className="text-sm font-medium text-foreground font-sans">
           Version history
         </span>
         <button
           onClick={onClose}
-          style={{
-            background: "none",
-            border: "none",
-            color: theme.muted,
-            fontSize: "16px",
-            cursor: "pointer",
-            padding: "0 4px",
-          }}
+          className="bg-transparent border-none text-muted text-lg cursor-pointer p-0.5 hover:text-foreground transition-colors duration-150"
         >
           ×
         </button>
       </div>
 
       {/* Version list */}
-      <div style={{ flex: 1, overflow: "auto" }}>
+      <div className="flex-1 overflow-auto">
         {/* Current version */}
-        <div
-          style={{
-            padding: "12px 16px",
-            borderBottom: `1px solid ${theme.border}`,
-            background: theme.accent + "11",
-          }}
-        >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
-            <span
-              style={{
-                fontSize: "12px",
-                color: theme.text,
-                fontFamily: theme.sans,
-                fontWeight: "500",
-              }}
-            >
+        <div className="px-4 py-3 border-b border-border bg-primary/5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs text-foreground font-sans font-medium">
               Current version
             </span>
-            <span
-              style={{
-                fontSize: "10px",
-                background: theme.accent + "22",
-                color: theme.accent,
-                padding: "1px 6px",
-                borderRadius: "8px",
-              }}
-            >
+            <span className="text-[10px] bg-primary/15 text-primary py-0.5 px-1.5 rounded-full">
               live
             </span>
           </div>
-          <p
-            style={{
-              fontSize: "11px",
-              color: theme.muted,
-              margin: "3px 0 0",
-              fontFamily: theme.sans,
-            }}
-          >
-            {currentContent.trim().split(/\s+/).filter(Boolean).length} words
+          <p className="text-xs text-muted mt-1 m-0 font-sans">
+            {currentWordCount} words
           </p>
         </div>
 
         {/* Saved versions */}
         {!versions ? (
-          <p
-            style={{
-              padding: "16px",
-              fontSize: "12px",
-              color: theme.muted,
-              fontFamily: theme.sans,
-            }}
-          >
-            Loading...
-          </p>
+          <div className="p-4 space-y-2">
+            <div className="skeleton h-8 rounded" />
+            <div className="skeleton h-8 rounded" />
+          </div>
         ) : versions.length === 0 ? (
-          <p
-            style={{
-              padding: "16px",
-              fontSize: "12px",
-              color: theme.muted,
-              fontFamily: theme.sans,
-            }}
-          >
+          <p className="p-4 text-xs text-muted font-sans">
             No saved versions yet. Save the document to create a version.
           </p>
         ) : (
@@ -155,44 +76,20 @@ export default function VersionPanel({
               onClick={() =>
                 setPreviewing(previewing?._id === v._id ? null : v)
               }
-              style={{
-                padding: "12px 16px",
-                borderBottom: `1px solid ${theme.border}`,
-                cursor: "pointer",
-                background:
-                  previewing?._id === v._id ? theme.badge : "transparent",
-                transition: "background 0.15s",
-              }}
+              className={`px-4 py-3 border-b border-border cursor-pointer transition-colors duration-150 hover:bg-badge ${
+                previewing?._id === v._id ? 'bg-badge' : ''
+              }`}
             >
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                }}
-              >
-                <span
-                  style={{
-                    fontSize: "12px",
-                    color: theme.text,
-                    fontFamily: theme.sans,
-                  }}
-                >
+              <div className="flex items-center justify-between">
+                <span className="text-xs text-foreground font-sans">
                   {timeAgo(v._creationTime)}
                 </span>
               </div>
-              <p
-                style={{
-                  fontSize: "11px",
-                  color: theme.muted,
-                  margin: "3px 0 0",
-                  fontFamily: theme.sans,
-                }}
-              >
+              <p className="text-xs text-muted mt-1 m-0 font-sans">
                 by {v.savedByName}
               </p>
 
-              {/* Restore button — only when selected */}
+              {/* Restore button */}
               {previewing?._id === v._id && (
                 <button
                   onClick={(e) => {
@@ -200,18 +97,7 @@ export default function VersionPanel({
                     onRestore(v.content);
                     onClose();
                   }}
-                  style={{
-                    marginTop: "8px",
-                    background: theme.accent,
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "6px",
-                    padding: "5px 12px",
-                    fontSize: "11px",
-                    fontFamily: theme.sans,
-                    cursor: "pointer",
-                    width: "100%",
-                  }}
+                  className="mt-2 w-full bg-primary text-white border-none rounded-md py-1.5 text-xs font-sans cursor-pointer hover:bg-primary-hover transition-colors duration-200"
                 >
                   Restore this version
                 </button>
