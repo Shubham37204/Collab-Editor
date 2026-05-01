@@ -176,6 +176,10 @@ export default function DashboardPage() {
         user={user}
         onShare={handleShare}
       />
+
+      <footer className="text-center py-8 border-t border-border/40 text-sm text-muted font-sans mt-auto">
+        © {new Date().getFullYear()} CollabDocs. Dashboard • Built with Next.js, Liveblocks & Convex.
+      </footer>
     </div>
   );
 }
