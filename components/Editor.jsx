@@ -244,7 +244,7 @@ export default function Editor({
 
     const darkTheme = EditorView.theme(
       {
-        "&": { background: "transparent", color: "var(--fg-color)", fontSize: "15px", fontFamily: "'Georgia', serif" },
+        "&": { backgroundColor: "transparent !important", color: "var(--fg-color)", fontSize: "15px", fontFamily: "'Georgia', serif" },
         ".cm-content": { padding: "0", caretColor: "var(--primary-color)" },
         ".cm-line": { padding: "0 0 2px 0", lineHeight: "1.8" },
         ".cm-cursor": { borderLeftColor: "var(--primary-color)" },
