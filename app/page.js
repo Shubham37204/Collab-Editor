@@ -106,35 +106,89 @@ export default function HomePage() {
       </header>
 
       {/* Hero */}
-      <section className="max-w-4xl mx-auto px-6 pt-28 pb-20 text-center animate-fade-in">
-        <div className="inline-flex items-center gap-2 bg-badge border border-border rounded-full px-4 py-1.5 text-xs font-sans tracking-widest uppercase text-muted mb-8 shadow-sm">
-          <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          Real-time collaboration
+      <section className="max-w-7xl mx-auto px-6 pt-24 pb-20 animate-fade-in">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+          {/* Left Column */}
+          <div className="text-left">
+            <h1 className="text-5xl md:text-[5.5rem] font-black leading-[1.05] tracking-tight mb-6 font-sans text-foreground">
+              One editor.<br />
+              <span className="text-[#f97316]">Endless collaboration.</span>
+            </h1>
+            <p className="text-lg md:text-xl text-muted leading-relaxed mb-10 max-w-lg font-sans font-medium">
+              From writing code to drafting documentation — your all-in-one collaborative workspace. No switching tabs, no lost data.
+            </p>
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
+              {!isSignedIn ? (
+                <SignInButton mode="modal">
+                  <button className="w-full sm:w-auto bg-[#f97316] text-white border-none px-8 py-4 text-base font-sans font-bold rounded-xl shadow-[0_4px_14px_0_rgba(249,115,22,0.39)] hover:bg-[#ea580c] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(249,115,22,0.23)] transition-all duration-300 cursor-pointer">
+                    Start for free →
+                  </button>
+                </SignInButton>
+              ) : (
+                <button 
+                  onClick={() => router.push('/dashboard')}
+                  className="w-full sm:w-auto bg-[#f97316] text-white border-none px-8 py-4 text-base font-sans font-bold rounded-xl shadow-[0_4px_14px_0_rgba(249,115,22,0.39)] hover:bg-[#ea580c] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
+                >
+                  Go to Dashboard →
+                </button>
+              )}
+              <button 
+                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                className="w-full sm:w-auto bg-transparent border-2 border-border text-foreground px-8 py-3.5 text-base font-sans font-bold rounded-xl hover:border-muted transition-colors cursor-pointer"
+              >
+                See features
+              </button>
+            </div>
+            
+            {/* Avatars */}
+            <div className="flex items-center gap-4">
+              <div className="flex -space-x-3">
+                <div className="w-8 h-8 rounded-full bg-orange-500 border-2 border-background flex items-center justify-center text-[10px] text-white font-bold">A</div>
+                <div className="w-8 h-8 rounded-full bg-yellow-400 border-2 border-background flex items-center justify-center text-[10px] text-white font-bold">B</div>
+                <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-background flex items-center justify-center text-[10px] text-white font-bold">C</div>
+                <div className="w-8 h-8 rounded-full bg-red-500 border-2 border-background flex items-center justify-center text-[10px] text-white font-bold">D</div>
+              </div>
+              <span className="text-sm font-sans text-muted">Built for curious minds, developers & creators</span>
+            </div>
+          </div>
+
+          {/* Right Column (Graphic) */}
+          <div className="relative w-full aspect-square max-w-md mx-auto lg:max-w-none">
+            {/* Soft Gradient Blob */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-yellow-200/50 via-orange-300/50 to-green-200/50 dark:from-yellow-500/20 dark:via-orange-500/20 dark:to-green-500/20 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] blur-3xl" />
+            
+            {/* Center Core */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-[#f97316] rounded-2xl flex items-center justify-center shadow-2xl z-20 shadow-orange-500/30">
+              <span className="text-3xl text-white">✨</span>
+            </div>
+            
+            {/* Floating Icons */}
+            <div className="absolute top-1/4 left-1/4 w-14 h-14 bg-background border border-border rounded-2xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '3s' }}>
+              <span className="text-xl text-red-500">🛡️</span>
+            </div>
+            <div className="absolute top-1/4 right-1/3 w-12 h-12 bg-background border border-border rounded-xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '4s', animationDelay: '1s' }}>
+              <span className="text-lg text-blue-500 font-bold font-mono">{'</>'}</span>
+            </div>
+            <div className="absolute top-1/2 right-1/4 w-12 h-12 bg-background border border-border rounded-xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '3.5s', animationDelay: '2s' }}>
+              <span className="text-lg text-cyan-500">🎵</span>
+            </div>
+            <div className="absolute bottom-1/4 right-1/3 w-14 h-14 bg-background border border-border rounded-2xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '3s', animationDelay: '1.5s' }}>
+              <span className="text-xl text-green-500">📷</span>
+            </div>
+            <div className="absolute bottom-1/4 left-1/3 w-12 h-12 bg-background border border-border rounded-xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '4s', animationDelay: '0.5s' }}>
+              <span className="text-lg text-purple-500">⚔️</span>
+            </div>
+            <div className="absolute top-1/2 left-1/4 w-10 h-10 bg-background border border-border rounded-lg flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '3.5s', animationDelay: '2.5s' }}>
+              <span className="text-base text-pink-500">✒️</span>
+            </div>
+          </div>
         </div>
-
-        <h1 className="text-5xl md:text-7xl font-bold leading-tight tracking-tight mb-8 font-sans">
-          Write together, <br />
-          <em className="italic text-primary">think together.</em>
-        </h1>
-
-        <p className="text-lg md:text-xl text-muted leading-relaxed mb-12 max-w-2xl mx-auto font-sans font-light">
-          Collaborative markdown editing with live cursors, AI-powered writing, and real-time sync.
-          Built for teams who think in writing.
-        </p>
-
-        {!isSignedIn && (
-          <SignInButton mode="modal">
-            <button className="glow-border relative bg-primary text-white border-none px-8 py-4 text-base font-sans font-medium rounded-xl shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-[0_0_60px_-15px_rgba(99,102,241,0.7)] transition-all duration-300 active:translate-y-0 cursor-pointer overflow-hidden">
-              <span className="relative z-10">Start writing for free →</span>
-            </button>
-          </SignInButton>
-        )}
       </section>
 
 
 
       {/* Bento Grid Features */}
-      <section className="max-w-6xl mx-auto px-6 py-24">
+      <section id="features" className="max-w-6xl mx-auto px-6 py-24">
         <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6">
           {/* Feature 1 - Large */}
           <div className="md:col-span-2 md:row-span-2 glass-panel rounded-3xl p-10 flex flex-col justify-end group hover:border-blue-500/40 transition-colors min-h-[400px] relative overflow-hidden">
@@ -240,6 +294,46 @@ export default function HomePage() {
                 </div>
               ))}
             </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Sign-in Banner Section */}
+      <section className="max-w-5xl mx-auto px-6 py-12 mb-10">
+
+        {/* Get In Touch */}
+        <div className="text-center mt-20 mb-10">
+          <p className="text-xs font-sans text-[#ea580c] font-bold tracking-widest uppercase mb-4">
+            GET IN TOUCH
+          </p>
+          <h3 className="text-3xl font-black text-foreground font-sans tracking-tight mb-3">
+            Have questions or ideas?
+          </h3>
+          <p className="text-muted font-sans mb-8">
+            Open source project — contributions and feedback always welcome.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <a 
+              href="https://github.com/shubham37204/collab-editor" 
+              target="_blank" 
+              rel="noreferrer"
+              className="w-full sm:w-auto bg-[#0f172a] text-white border-none px-6 py-3 text-sm font-sans font-bold rounded-xl hover:bg-black transition-colors cursor-pointer flex items-center justify-center gap-2 no-underline"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
+              </svg>
+              View on GitHub
+            </a>
+            <a 
+              href="mailto:contact@collabdocs.com"
+              className="w-full sm:w-auto bg-transparent border border-border text-foreground px-6 py-3 text-sm font-sans font-bold rounded-xl hover:border-muted transition-colors cursor-pointer flex items-center justify-center gap-2 no-underline"
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="2" y="4" width="20" height="16" rx="2" />
+                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+              </svg>
+              Send an email
+            </a>
           </div>
         </div>
       </section>
