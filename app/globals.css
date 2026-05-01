@@ -42,16 +42,16 @@
 }
 
 .dark {
-  --bg-color: #0c0a09;
-  --bg-secondary-color: #1c1917;
-  --fg-color: #fafaf9;
-  --muted-color: #a8a29e;
-  --card-color: #171412;
-  --surface-color: #1c1917;
-  --border-color: #292524;
-  --primary-color: #a78bfa;
-  --primary-hover-color: #8b5cf6;
-  --badge-color: #1c1917;
+  --bg-color: #05050a;
+  --bg-secondary-color: #0d0d14;
+  --fg-color: #f8fafc;
+  --muted-color: #94a3b8;
+  --card-color: #0f111a;
+  --surface-color: #161821;
+  --border-color: #1e2230;
+  --primary-color: #6366f1;
+  --primary-hover-color: #4f46e5;
+  --badge-color: #161821;
   --danger-color: #f87171;
   --success-color: #4ade80;
 }
@@ -115,6 +115,35 @@ body {
   background: color-mix(in srgb, var(--card-color) 80%, transparent);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+}
+
+.glass-panel {
+  background: color-mix(in srgb, var(--card-color) 60%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid color-mix(in srgb, var(--fg-color) 8%, transparent);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+}
+
+.glow-border {
+  position: relative;
+}
+.glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(to bottom right, var(--primary-color), transparent, var(--primary-color));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+.glow-border:hover::before {
+  opacity: 0.5;
 }
 
 /* ── Focus rings ── */

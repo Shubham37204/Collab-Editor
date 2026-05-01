@@ -13,11 +13,11 @@ import DocCard from "../../components/DocCard";
 /* ── Skeleton loader ── */
 function DocCardSkeleton() {
   return (
-    <div className="flex items-center gap-4 p-4 rounded-lg border border-border">
-      <div className="skeleton w-9 h-9 rounded-md shrink-0" />
-      <div className="flex-1 space-y-2">
-        <div className="skeleton h-4 w-2/5 rounded" />
-        <div className="skeleton h-3 w-1/3 rounded" />
+    <div className="glass-panel flex flex-col justify-between p-6 rounded-2xl min-h-[160px]">
+      <div className="skeleton w-10 h-10 rounded-xl shrink-0" />
+      <div className="mt-8 space-y-3">
+        <div className="skeleton h-5 w-3/4 rounded" />
+        <div className="skeleton h-3 w-1/2 rounded" />
       </div>
     </div>
   );
@@ -111,7 +111,8 @@ export default function DashboardPage() {
       />
 
       {/* Main content */}
-      <main className="max-w-3xl mx-auto px-8 py-14">
+      <main className="max-w-6xl mx-auto px-8 py-14 relative z-10">
+        <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full -z-10 pointer-events-none" />
         {/* Title row */}
         <div className="flex items-baseline justify-between mb-10">
           <h2 className="font-sans text-3xl font-semibold tracking-tight m-0 text-foreground">My Documents</h2>
@@ -128,8 +129,8 @@ export default function DashboardPage() {
         {/* Document list */}
         {docs === undefined ? (
           /* Skeleton loading */
-          <div className="space-y-2 animate-fade-in">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
+            {[...Array(6)].map((_, i) => (
               <DocCardSkeleton key={i} />
             ))}
           </div>
@@ -142,7 +143,7 @@ export default function DashboardPage() {
         ) : filteredDocs.length === 0 ? (
           <EmptyState onCreateNew={() => setShowModal(true)} />
         ) : (
-          <div className="grid gap-1 animate-fade-in">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
             {filteredDocs.map((doc) => (
               <DocCard
                 key={doc._id}

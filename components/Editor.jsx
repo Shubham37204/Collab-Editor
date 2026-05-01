@@ -13,6 +13,7 @@ import { SplitPreview, FullPreview } from "./editor/MarkdownPreview";
 import SlashCommandMenu from "./editor/SlashCommandMenu";
 import StatusBar from "./editor/StatusBar";
 import CollaboratorAvatars from "./editor/CollaboratorAvatars";
+import ShareDocModal from "./dashboard/ShareDocModal";
 import { EditorView, placeholder } from "@codemirror/view";
 import { EditorState } from "@codemirror/state";
 import { basicSetup } from "codemirror";
@@ -52,10 +53,12 @@ export default function Editor({
   const [slashFilter, setSlashFilter] = useState("");
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState("connected");
+  const [showShare, setShowShare] = useState(false);
 
   const saveContent = useMutation(api.documents.updateContent);
   const saveTitle = useMutation(api.documents.updateTitle);
   const saveVersion = useMutation(api.documents.saveVersion);
+  const addCollab = useMutation(api.documents.addCollaborator);
 
   /* ── Debounced auto-save ── */
   const debouncedSave = useCallback(
@@ -130,16 +133,19 @@ export default function Editor({
   };
 
   const handleExportPDF = () => {
-    if (!preview) {
-      setPreview(true);
-      setTimeout(() => {
-        window.print();
-        setTimeout(() => setPreview(false), 500);
-      }, 350);
-    } else {
-      window.print();
-    }
+    window.print();
     setShowExport(false);
+  };
+
+  const handleShare = async (email, role) => {
+    if (!email.trim()) return;
+    await addCollab({
+      docId,
+      userId: email,
+      email,
+      name: email,
+      role,
+    });
   };
 
   /* ── Slash commands ── */
@@ -233,7 +239,7 @@ export default function Editor({
       ".cm-strong": { fontWeight: "bold", color: "var(--fg-color)" },
       ".cm-em": { fontStyle: "italic" },
       ".cm-heading": { fontWeight: "bold", color: "var(--primary-color)" },
-      ".cm-placeholder": { color: "var(--muted-color)", fontStyle: "italic" }
+      ".cm-placeholder": { color: "var(--muted-color)", fontStyle: "italic", fontSize: "1.1rem", opacity: "0.7" }
     });
 
     const darkTheme = EditorView.theme(
@@ -250,7 +256,7 @@ export default function Editor({
         ".cm-strong": { fontWeight: "bold", color: "var(--fg-color)" },
         ".cm-em": { fontStyle: "italic" },
         ".cm-heading": { fontWeight: "bold", color: "var(--primary-color)" },
-        ".cm-placeholder": { color: "var(--muted-color)", fontStyle: "italic" }
+        ".cm-placeholder": { color: "var(--muted-color)", fontStyle: "italic", fontSize: "1.1rem", opacity: "0.7" }
       },
       { dark: true },
     );
@@ -313,6 +319,7 @@ export default function Editor({
         onExportMD={handleExportMD}
         onExportPDF={handleExportPDF}
         onSave={handleManualSave}
+        onShare={() => setShowShare(true)}
         saving={saving}
         collaborators={<CollaboratorAvatars others={others} />}
       />
@@ -327,12 +334,12 @@ export default function Editor({
         {/* CodeMirror */}
         <div
           ref={editorContainerRef}
-          className={`flex-1 overflow-auto text-sm flex flex-col ${
+          className={`flex-1 overflow-auto text-sm flex flex-col pt-32 pb-24 ${
             preview ? 'hidden' : ''
           } ${
             focusMode
-              ? 'max-w-[740px] mx-auto w-full px-16 py-12'
-              : 'px-12 py-6'
+              ? 'max-w-[740px] mx-auto w-full px-12 md:px-16'
+              : 'max-w-5xl mx-auto w-full px-10 md:px-16'
           }`}
         />
 
@@ -397,6 +404,20 @@ export default function Editor({
       {showShortcuts && (
         <ShortcutsModal onClose={() => setShowShortcuts(false)} />
       )}
+
+      {/* Share Modal */}
+      <ShareDocModal
+        open={showShare}
+        onClose={() => setShowShare(false)}
+        doc={{ _id: docId, title: title, collaborators: [] }}
+        user={{ id: currentUserId, emailAddresses: [] }}
+        onShare={handleShare}
+      />
+
+      {/* Invisible print container for PDF export */}
+      <div className="hidden print:block">
+        <FullPreview content={content} />
+      </div>
     </div>
   );
 }

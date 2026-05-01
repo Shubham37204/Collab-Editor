@@ -39,6 +39,12 @@ const STEPS = [
   { step: "3", title: "Collaborate", desc: "Share and edit together in real time", color: "text-green-500 bg-green-500/10 border-green-500/20 group-hover:bg-green-500" },
 ];
 
+const TESTIMONIALS = [
+  { name: "Sarah Jenkins", role: "Engineering Manager", quote: "The zero-latency sync is genuinely mind-blowing. It feels like we're finally using a modern editor." },
+  { name: "David Chen", role: "Senior Developer", quote: "Being able to write Markdown collaboratively without switching context is exactly what our team needed." },
+  { name: "Elena Rodriguez", role: "Product Lead", quote: "CollabDocs replaced three different tools for us. The UI is gorgeous and incredibly fast." },
+];
+
 export default function HomePage() {
   const router = useRouter();
   const { isLoaded, isSignedIn } = useUser();
@@ -60,8 +66,8 @@ export default function HomePage() {
   return (
     <main className="min-h-screen bg-background text-foreground font-sans relative overflow-hidden transition-colors duration-300">
       {/* Background decorations */}
-      <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-gradient-to-br from-blue-500/15 to-yellow-400/10 rounded-full blur-3xl opacity-60 -z-10 animate-pulse pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-10%] w-[500px] h-[500px] bg-gradient-to-tr from-green-500/10 to-transparent rounded-full blur-3xl opacity-50 -z-10 pointer-events-none" />
+      <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-br from-primary/30 via-blue-500/20 to-transparent rounded-full blur-[100px] opacity-70 -z-10 animate-pulse pointer-events-none" />
+      <div className="absolute bottom-[-10%] left-[-20%] w-[600px] h-[600px] bg-gradient-to-tr from-green-500/20 to-transparent rounded-full blur-[100px] opacity-50 -z-10 pointer-events-none" />
 
       {/* Header */}
       <header className={`flex justify-between items-center px-8 md:px-12 py-4 sticky top-0 z-50 transition-all duration-300 ${
@@ -118,8 +124,8 @@ export default function HomePage() {
 
         {!isSignedIn && (
           <SignInButton mode="modal">
-            <button className="bg-primary text-white border-none px-8 py-4 text-base font-sans font-medium rounded-xl shadow-lg shadow-primary/25 hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-xl transition-all duration-200 active:translate-y-0 cursor-pointer">
-              Start writing for free →
+            <button className="glow-border relative bg-primary text-white border-none px-8 py-4 text-base font-sans font-medium rounded-xl shadow-[0_0_40px_-10px_rgba(99,102,241,0.5)] hover:bg-primary-hover hover:-translate-y-0.5 hover:shadow-[0_0_60px_-15px_rgba(99,102,241,0.7)] transition-all duration-300 active:translate-y-0 cursor-pointer overflow-hidden">
+              <span className="relative z-10">Start writing for free →</span>
             </button>
           </SignInButton>
         )}
@@ -127,25 +133,39 @@ export default function HomePage() {
 
 
 
-      {/* Features */}
+      {/* Bento Grid Features */}
       <section className="max-w-6xl mx-auto px-6 py-24">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {FEATURES.map((f) => (
-            <div
-              key={f.num}
-              className={`bg-card border border-border rounded-2xl p-8 hover:-translate-y-1 transition-all duration-300 group shadow-sm hover:shadow-md ${f.hoverBorder}`}
-            >
-              <div className={`w-12 h-12 ${f.iconBg} rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform duration-300`}>
-                <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">{f.icon}</span>
-              </div>
-              <h3 className="text-xl font-sans font-bold mb-3 text-foreground tracking-tight">
-                {f.title}
-              </h3>
-              <p className="text-sm text-muted leading-relaxed font-sans">
-                {f.desc}
-              </p>
+        <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-6">
+          {/* Feature 1 - Large */}
+          <div className="md:col-span-2 md:row-span-2 glass-panel rounded-3xl p-10 flex flex-col justify-end group hover:border-blue-500/40 transition-colors min-h-[400px] relative overflow-hidden">
+            <div className="absolute top-8 right-8 w-16 h-16 bg-blue-500/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-500">
+              <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">⚡</span>
             </div>
-          ))}
+            <div>
+              <h3 className="text-3xl font-sans font-bold mb-4 text-foreground tracking-tight">Real-time sync</h3>
+              <p className="text-lg text-muted leading-relaxed font-sans max-w-sm">Every keystroke propagated instantly across all collaborators with zero latency via Yjs CRDTs.</p>
+            </div>
+          </div>
+          {/* Feature 2 - Top Right */}
+          <div className="md:col-span-2 md:row-span-1 glass-panel rounded-3xl p-8 flex flex-col justify-end group hover:border-orange-500/40 transition-colors min-h-[200px] relative overflow-hidden">
+            <div className="absolute top-6 right-6 w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-500">
+              <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">✨</span>
+            </div>
+            <div>
+              <h3 className="text-2xl font-sans font-bold mb-2 text-foreground tracking-tight">Live cursors</h3>
+              <p className="text-sm text-muted leading-relaxed font-sans max-w-xs">See exactly where your teammates are writing in real time, making pair writing seamless.</p>
+            </div>
+          </div>
+          {/* Feature 3 - Bottom Right */}
+          <div className="md:col-span-2 md:row-span-1 glass-panel rounded-3xl p-8 flex flex-col justify-end group hover:border-green-500/40 transition-colors min-h-[200px] relative overflow-hidden">
+            <div className="absolute top-6 right-6 w-12 h-12 bg-green-500/10 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-500">
+              <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">📝</span>
+            </div>
+            <div>
+              <h3 className="text-2xl font-sans font-bold mb-2 text-foreground tracking-tight">Markdown support</h3>
+              <p className="text-sm text-muted leading-relaxed font-sans max-w-xs">Write seamlessly with familiar markdown syntax and see the results instantly.</p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -171,32 +191,56 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* Built for Engineering */}
-      <section className="max-w-5xl mx-auto px-6 py-20 mb-10 bg-badge/30 rounded-3xl border border-border/50">
-        <div className="text-center mb-12">
-          <p className="text-xs font-sans text-primary tracking-widest uppercase font-bold mb-3">
-            Developer First
-          </p>
-          <h2 className="text-3xl md:text-4xl font-sans font-bold mb-4 tracking-tight">
-            Built on a modern stack.
-          </h2>
-          <p className="text-muted font-sans max-w-xl mx-auto">
-            CollabDocs leverages state-of-the-art technologies to ensure zero-latency collaboration and complete data integrity.
-          </p>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { name: "Next.js 14", desc: "App Router & Server Components" },
-            { name: "Yjs CRDT", desc: "Zero-conflict resolution" },
-            { name: "Liveblocks", desc: "WebSocket infrastructure" },
-            { name: "Convex", desc: "Real-time database" },
-          ].map((tech) => (
-            <div key={tech.name} className="p-4 bg-background border border-border hover:border-blue-500/30 transition-colors rounded-xl shadow-sm">
-              <h4 className="font-sans font-bold text-foreground mb-1">{tech.name}</h4>
-              <p className="text-xs text-muted font-sans">{tech.desc}</p>
+      {/* Testimonials */}
+      <section className="max-w-6xl mx-auto px-6 py-20 relative">
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-[300px] bg-primary/5 blur-[120px] -z-10 rounded-full" />
+        <h2 className="text-3xl md:text-4xl font-sans font-bold text-center mb-16 tracking-tight">
+          Loved by engineering teams.
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {TESTIMONIALS.map((t, i) => (
+            <div key={i} className="glass-panel rounded-2xl p-8 flex flex-col justify-between hover:-translate-y-1 transition-transform duration-300">
+              <p className="text-muted font-sans leading-relaxed mb-8">"{t.quote}"</p>
+              <div>
+                <p className="font-sans font-bold text-foreground">{t.name}</p>
+                <p className="text-xs text-muted font-sans uppercase tracking-wider mt-1">{t.role}</p>
+              </div>
             </div>
           ))}
+        </div>
+      </section>
+
+      {/* Built for Engineering */}
+      <section className="max-w-6xl mx-auto px-6 py-24 mb-10">
+        <div className="glass-panel rounded-3xl p-12 md:p-20 relative overflow-hidden text-center">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[80px] rounded-full" />
+          <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/20 blur-[80px] rounded-full" />
+          
+          <div className="relative z-10">
+            <p className="text-xs font-sans text-primary tracking-widest uppercase font-bold mb-4">
+              Developer First
+            </p>
+            <h2 className="text-4xl md:text-5xl font-sans font-bold mb-6 tracking-tight">
+              Built on a modern stack.
+            </h2>
+            <p className="text-lg text-muted font-sans max-w-2xl mx-auto mb-16">
+              CollabDocs leverages state-of-the-art technologies to ensure zero-latency collaboration and complete data integrity.
+            </p>
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { name: "Next.js 14", desc: "App Router & Server Components" },
+                { name: "Yjs CRDT", desc: "Zero-conflict resolution" },
+                { name: "Liveblocks", desc: "WebSocket infrastructure" },
+                { name: "Convex", desc: "Real-time database" },
+              ].map((tech) => (
+                <div key={tech.name} className="glow-border bg-card/40 backdrop-blur-sm border border-border/50 p-6 rounded-2xl hover:bg-card/80 transition-colors text-left">
+                  <h4 className="font-sans font-bold text-lg text-foreground mb-2">{tech.name}</h4>
+                  <p className="text-sm text-muted font-sans">{tech.desc}</p>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
