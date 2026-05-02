@@ -1,59 +1,17 @@
 "use client";
-import { useRouter } from "next/navigation";
-import { useUser, SignInButton } from "@clerk/nextjs";
 import { useEffect, useState } from "react";
-import { useTheme } from "./layout";
-
-
-
-const FEATURES = [
-  {
-    num: "01",
-    title: "Real-time sync",
-    desc: "Every keystroke propagated instantly across all collaborators with zero latency via Yjs CRDTs.",
-    icon: "⚡",
-    iconBg: "bg-blue-500/10",
-    hoverBorder: "hover:border-blue-500/40",
-  },
-  {
-    num: "02",
-    title: "Live cursors",
-    desc: "See exactly where your teammates are writing in real time, making pair writing seamless.",
-    icon: "✨",
-    iconBg: "bg-orange-500/10",
-    hoverBorder: "hover:border-orange-500/40",
-  },
-  {
-    num: "03",
-    title: "Markdown support",
-    desc: "Write seamlessly with familiar markdown syntax and see the results instantly in the split preview.",
-    icon: "📝",
-    iconBg: "bg-green-500/10",
-    hoverBorder: "hover:border-green-500/40",
-  },
-];
-
-const STEPS = [
-  { step: "1", title: "Create", desc: "Start a new document or pick a template", color: "text-blue-500 bg-blue-500/10 border-blue-500/20 group-hover:bg-blue-500" },
-  { step: "2", title: "Write", desc: "Rich markdown editing with live preview", color: "text-orange-500 bg-orange-500/10 border-orange-500/20 group-hover:bg-orange-500" },
-  { step: "3", title: "Collaborate", desc: "Share and edit together in real time", color: "text-green-500 bg-green-500/10 border-green-500/20 group-hover:bg-green-500" },
-];
-
-const TESTIMONIALS = [
-  { name: "Sarah Jenkins", role: "Engineering Manager", quote: "The zero-latency sync is genuinely mind-blowing. It feels like we're finally using a modern editor." },
-  { name: "David Chen", role: "Senior Developer", quote: "Being able to write Markdown collaboratively without switching context is exactly what our team needed." },
-  { name: "Elena Rodriguez", role: "Product Lead", quote: "CollabDocs replaced three different tools for us. The UI is gorgeous and incredibly fast." },
-];
+import Navbar from "../components/landing/Navbar";
+import Hero from "../components/landing/Hero";
+import Features from "../components/landing/Features";
+import HowItWorks from "../components/landing/HowItWorks";
+import SocialProof from "../components/landing/SocialProof";
+import FAQ from "../components/landing/FAQ";
+import CTA from "../components/landing/CTA";
+import Footer from "../components/landing/Footer";
+import ScrollToTop from "../components/landing/ScrollToTop";
 
 export default function HomePage() {
-  const router = useRouter();
-  const { isLoaded, isSignedIn } = useUser();
-  const { dark, setDark } = useTheme();
   const [scrolled, setScrolled] = useState(false);
-
-  useEffect(() => {
-    if (isLoaded && isSignedIn) router.push("/dashboard");
-  }, [isLoaded, isSignedIn, router]);
 
   useEffect(() => {
     const handler = () => setScrolled(window.scrollY > 20);
@@ -61,211 +19,28 @@ export default function HomePage() {
     return () => window.removeEventListener("scroll", handler);
   }, []);
 
-  if (!isLoaded) return null;
-
   return (
-    <main className="min-h-screen bg-background text-foreground font-sans relative overflow-hidden transition-colors duration-300">
+    <main className="min-h-screen bg-background text-foreground font-sans relative transition-colors duration-300">
       {/* Background decorations */}
       <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-br from-primary/30 via-orange-500/10 to-transparent rounded-full blur-[100px] opacity-70 -z-10 animate-pulse pointer-events-none" />
-      <div className="absolute bottom-[-10%] left-[-20%] w-[600px] h-[600px] bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-[100px] opacity-50 -z-10 pointer-events-none" />
+      <div className="absolute bottom-0 left-[-20%] w-[600px] h-[600px] bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-[100px] opacity-50 -z-10 pointer-events-none" />
 
-      {/* Header */}
-      <header className={`flex justify-between items-center px-8 md:px-12 py-4 sticky top-0 z-50 transition-all duration-300 ${
-        scrolled ? 'border-b border-border/60 glass' : 'bg-transparent'
-      }`}>
-        <div className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-          <div className="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-primary" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
-              <polyline points="14 2 14 8 20 8" />
-              <line x1="16" y1="13" x2="8" y2="13" />
-              <line x1="16" y1="17" x2="8" y2="17" />
-              <line x1="10" y1="9" x2="8" y2="9" />
-            </svg>
-          </div>
-          <span className="font-sans font-bold text-xl tracking-tight text-foreground">
-            CollabDocs
-          </span>
-        </div>
-
-        <div className="flex items-center gap-4">
-          <button
-            onClick={() => setDark(!dark)}
-            className="bg-badge border border-border rounded-full px-4 py-1.5 text-xs font-sans text-muted hover:text-foreground hover:border-muted transition-all duration-200 cursor-pointer"
-          >
-            {dark ? "Light Mode" : "Dark Mode"}
-          </button>
-          {!isSignedIn && (
-            <SignInButton mode="modal">
-              <button className="bg-primary text-white border-none px-5 py-2 text-sm font-sans font-medium rounded-lg cursor-pointer hover:bg-primary-hover transition-colors duration-200">
-                Get Started
-              </button>
-            </SignInButton>
-          )}
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section className="max-w-7xl mx-auto px-6 pt-24 pb-20 animate-fade-in">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-          {/* Left Column */}
-          <div className="text-left">
-            <h1 className="text-5xl md:text-[5.5rem] font-black leading-[1.05] tracking-tight mb-6 font-sans text-foreground">
-              One editor.<br />
-              <span className="text-[#f97316]">Endless collaboration.</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted leading-relaxed mb-10 max-w-lg font-sans font-medium">
-              From writing code to drafting documentation — your all-in-one collaborative workspace. No switching tabs, no lost data.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center gap-4 mb-12">
-              {!isSignedIn ? (
-                <SignInButton mode="modal">
-                  <button className="w-full sm:w-auto bg-[#f97316] text-white border-none px-8 py-4 text-base font-sans font-bold rounded-xl shadow-[0_4px_14px_0_rgba(249,115,22,0.39)] hover:bg-[#ea580c] hover:-translate-y-0.5 hover:shadow-[0_6px_20px_rgba(249,115,22,0.23)] transition-all duration-300 cursor-pointer">
-                    Start for free →
-                  </button>
-                </SignInButton>
-              ) : (
-                <button 
-                  onClick={() => router.push('/dashboard')}
-                  className="w-full sm:w-auto bg-[#f97316] text-white border-none px-8 py-4 text-base font-sans font-bold rounded-xl shadow-[0_4px_14px_0_rgba(249,115,22,0.39)] hover:bg-[#ea580c] hover:-translate-y-0.5 transition-all duration-300 cursor-pointer"
-                >
-                  Go to Dashboard →
-                </button>
-              )}
-              <button 
-                onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-                className="w-full sm:w-auto bg-transparent border-2 border-border text-foreground px-8 py-3.5 text-base font-sans font-bold rounded-xl hover:border-muted transition-colors cursor-pointer"
-              >
-                See features
-              </button>
-            </div>
-            
-            {/* Avatars */}
-            <div className="flex items-center gap-4">
-              <div className="flex -space-x-3">
-                <div className="w-8 h-8 rounded-full bg-orange-500 border-2 border-background flex items-center justify-center text-[10px] text-white font-bold">A</div>
-                <div className="w-8 h-8 rounded-full bg-yellow-400 border-2 border-background flex items-center justify-center text-[10px] text-white font-bold">B</div>
-                <div className="w-8 h-8 rounded-full bg-blue-500 border-2 border-background flex items-center justify-center text-[10px] text-white font-bold">C</div>
-                <div className="w-8 h-8 rounded-full bg-red-500 border-2 border-background flex items-center justify-center text-[10px] text-white font-bold">D</div>
-              </div>
-              <span className="text-sm font-sans text-muted">Built for curious minds, developers & creators</span>
-            </div>
-          </div>
-
-          {/* Right Column (Graphic) */}
-          <div className="relative w-full aspect-square max-w-md mx-auto lg:max-w-none">
-            {/* Soft Gradient Blob */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-yellow-200/50 via-orange-300/50 to-green-200/50 dark:from-yellow-500/20 dark:via-orange-500/20 dark:to-green-500/20 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] blur-3xl" />
-            
-            {/* Center Core */}
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-[#f97316] rounded-2xl flex items-center justify-center shadow-2xl z-20 shadow-orange-500/30">
-              <span className="text-3xl text-white">✨</span>
-            </div>
-            
-            {/* Floating Icons */}
-            <div className="absolute top-1/4 left-1/4 w-14 h-14 bg-background border border-border rounded-2xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '3s' }}>
-              <span className="text-xl text-red-500">🛡️</span>
-            </div>
-            <div className="absolute top-1/4 right-1/3 w-12 h-12 bg-background border border-border rounded-xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '4s', animationDelay: '1s' }}>
-              <span className="text-lg text-blue-500 font-bold font-mono">{'</>'}</span>
-            </div>
-            <div className="absolute top-1/2 right-1/4 w-12 h-12 bg-background border border-border rounded-xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '3.5s', animationDelay: '2s' }}>
-              <span className="text-lg text-cyan-500">🎵</span>
-            </div>
-            <div className="absolute bottom-1/4 right-1/3 w-14 h-14 bg-background border border-border rounded-2xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '3s', animationDelay: '1.5s' }}>
-              <span className="text-xl text-green-500">📷</span>
-            </div>
-            <div className="absolute bottom-1/4 left-1/3 w-12 h-12 bg-background border border-border rounded-xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '4s', animationDelay: '0.5s' }}>
-              <span className="text-lg text-purple-500">⚔️</span>
-            </div>
-            <div className="absolute top-1/2 left-1/4 w-10 h-10 bg-background border border-border rounded-lg flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '3.5s', animationDelay: '2.5s' }}>
-              <span className="text-base text-pink-500">✒️</span>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-
-      {/* Bento Grid Features */}
-      <section id="features" className="max-w-6xl mx-auto px-6 py-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {/* Feature 1 - Large */}
-          <div className="glass-panel rounded-3xl p-10 flex flex-col justify-between group hover:border-primary/40 transition-colors min-h-[400px] relative overflow-hidden">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-4xl group-hover:scale-110 transition-transform duration-500">
-              <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">⚡</span>
-            </div>
-            <div>
-              <h3 className="text-3xl font-sans font-bold mb-4 text-foreground tracking-tight">Real-time sync</h3>
-              <p className="text-lg text-muted leading-relaxed font-sans max-w-sm">Every keystroke propagated instantly across all collaborators with zero latency via Yjs CRDTs.</p>
-            </div>
-          </div>
-          
-          <div className="grid grid-cols-1 gap-8">
-            {/* Feature 2 */}
-            <div className="glass-panel rounded-3xl p-8 flex flex-col justify-between group hover:border-primary/40 transition-colors relative overflow-hidden">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-500">
-                <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">✨</span>
-              </div>
-              <div className="mt-6">
-                <h3 className="text-2xl font-sans font-bold mb-2 text-foreground tracking-tight">Live cursors</h3>
-                <p className="text-sm text-muted leading-relaxed font-sans max-w-xs">See exactly where your teammates are writing in real time, making pair writing seamless.</p>
-              </div>
-            </div>
-            {/* Feature 3 */}
-            <div className="glass-panel rounded-3xl p-8 flex flex-col justify-between group hover:border-primary/40 transition-colors relative overflow-hidden">
-              <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center text-2xl group-hover:scale-110 transition-transform duration-500">
-                <span className="grayscale opacity-80 group-hover:grayscale-0 group-hover:opacity-100 transition-all">📝</span>
-              </div>
-              <div className="mt-6">
-                <h3 className="text-2xl font-sans font-bold mb-2 text-foreground tracking-tight">Markdown support</h3>
-                <p className="text-sm text-muted leading-relaxed font-sans max-w-xs">Write seamlessly with familiar markdown syntax and see the results instantly.</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Get In Touch */}
-      <section className="max-w-3xl mx-auto px-6 py-24 text-center">
-        <p className="text-xs font-sans text-primary font-bold tracking-widest uppercase mb-4">
-          GET IN TOUCH
-        </p>
-        <h3 className="text-3xl md:text-4xl font-black text-foreground font-sans tracking-tight mb-4">
-          Have questions or ideas?
-        </h3>
-        <p className="text-lg text-muted font-sans mb-10 max-w-lg mx-auto">
-          CollabDocs is an open source project — contributions and feedback are always welcome.
-        </p>
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a 
-            href="https://github.com/shubham37204/collab-editor" 
-            target="_blank" 
-            rel="noreferrer"
-            className="w-full sm:w-auto bg-foreground text-background border-none px-8 py-4 text-base font-sans font-bold rounded-xl hover:opacity-90 transition-all cursor-pointer flex items-center justify-center gap-2 no-underline shadow-lg"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
-              <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0112 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0022 12.017C22 6.484 17.522 2 12 2z"/>
-            </svg>
-            View on GitHub
-          </a>
-          <a 
-            href="mailto:contact@collabdocs.com"
-            className="w-full sm:w-auto bg-transparent border-2 border-border text-foreground px-8 py-3.5 text-base font-sans font-bold rounded-xl hover:border-muted transition-colors cursor-pointer flex items-center justify-center gap-2 no-underline"
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="2" y="4" width="20" height="16" rx="2" />
-              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
-            </svg>
-            Send an email
-          </a>
-        </div>
-      </section>
-
-      {/* Footer */}
-      <footer className="text-center py-8 border-t border-border/40 text-sm text-muted font-sans">
-        © {new Date().getFullYear()} CollabDocs. Built with Next.js, Liveblocks & Convex.
-      </footer>
+      <Navbar scrolled={scrolled} />
+      
+      <Hero />
+      
+      <SocialProof />
+      
+      <Features />
+      
+      <HowItWorks />
+      
+      <FAQ />
+      
+      <CTA />
+      
+      <Footer />
+      <ScrollToTop />
     </main>
   );
 }

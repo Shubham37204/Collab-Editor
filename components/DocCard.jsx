@@ -77,13 +77,18 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
         </div>
 
         <div className="flex items-center justify-between">
-          <p className="text-xs text-muted font-sans m-0">
-            {new Date(doc._creationTime).toLocaleDateString('en-US', {
-              month: 'short', day: 'numeric', year: 'numeric',
-            })}
-            <span className="mx-1.5 opacity-40">·</span>
-            {wordCount} {wordCount === 1 ? 'word' : 'words'}
-          </p>
+          <div className="flex flex-col gap-0.5">
+            <p className="text-[10px] text-muted/60 font-sans font-medium m-0">
+              {doc.ownerName || 'Unknown'}
+            </p>
+            <p className="text-xs text-muted font-sans m-0">
+              {new Date(doc._creationTime).toLocaleDateString('en-US', {
+                month: 'short', day: 'numeric', year: 'numeric',
+              })}
+              <span className="mx-1.5 opacity-40">·</span>
+              {wordCount} {wordCount === 1 ? 'word' : 'words'}
+            </p>
+          </div>
 
           {doc.collaborators?.length > 0 && (
             <span className="text-[10px] bg-primary/20 text-primary py-0.5 px-2 rounded-full font-sans font-bold tracking-wider uppercase border border-primary/20 drop-shadow-sm">

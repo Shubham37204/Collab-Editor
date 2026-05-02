@@ -29,6 +29,7 @@ export default function UnifiedHeader({
   onShare,
   saving,
   collaborators,
+  isReadOnly,
 }) {
   const { dark, setDark } = useTheme()
   const router = useRouter()
@@ -36,15 +37,15 @@ export default function UnifiedHeader({
   if (focusMode) return null;
 
   return (
-    <div className="fixed top-6 left-1/2 -translate-x-1/2 z-[100] glass-panel rounded-full px-4 py-2 flex items-center justify-between gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] w-11/12 max-w-4xl border border-white/10 backdrop-blur-xl transition-all duration-300">
+    <div className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-[100] glass-panel rounded-2xl md:rounded-full px-3 md:px-4 py-2 flex items-center justify-between gap-2 md:gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] w-[95%] max-w-4xl border border-white/10 backdrop-blur-xl transition-all duration-300">
       {/* Left: Back button & Title */}
-      <div className="flex items-center gap-2 flex-1 min-w-0">
+      <div className="flex items-center gap-1 md:gap-2 flex-1 min-w-0">
         <button
           onClick={() => router.push('/dashboard')}
-          className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-muted hover:text-foreground transition-colors cursor-pointer shrink-0"
+          className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-muted hover:text-foreground transition-colors cursor-pointer shrink-0"
           title="Back to Dashboard"
         >
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
             <line x1="19" y1="12" x2="5" y2="12"></line>
             <polyline points="12 19 5 12 12 5"></polyline>
           </svg>
@@ -53,57 +54,66 @@ export default function UnifiedHeader({
           value={title}
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Untitled"
-          className="text-sm font-sans font-medium bg-transparent border-none outline-none text-foreground tracking-tight w-full max-w-[150px] placeholder:text-muted/50"
+          readOnly={isReadOnly}
+          className={`text-xs md:text-sm font-sans font-medium bg-transparent border-none outline-none text-foreground tracking-tight w-full max-w-[80px] md:max-w-[150px] placeholder:text-muted/50 ${isReadOnly ? 'cursor-default' : ''}`}
         />
-        <span className={`text-[10px] font-sans font-medium tracking-wide uppercase whitespace-nowrap ml-2 ${saving ? 'text-primary animate-pulse drop-shadow-[0_0_5px_rgba(249,115,22,0.5)]' : 'text-muted'}`}>
-          {saving ? "Saving" : "Saved"}
-        </span>
+        {isReadOnly ? (
+          <span className="text-[9px] md:text-[10px] font-sans font-bold tracking-wide uppercase px-2 py-0.5 rounded-full bg-white/5 text-muted border border-white/10 ml-2">
+            View Only
+          </span>
+        ) : (
+          <span className={`text-[9px] md:text-[10px] font-sans font-medium tracking-wide uppercase whitespace-nowrap ml-1 md:ml-2 ${saving ? 'text-primary animate-pulse' : 'text-muted'}`}>
+            {saving ? "..." : "Saved"}
+          </span>
+        )}
       </div>
 
-      {/* Center: Formatting tools */}
-      <div className="flex items-center justify-center shrink-0 px-2">
-        <div className="flex items-center gap-1 bg-black/20 p-1 rounded-full border border-white/5 shadow-inner">
-          {FORMAT_BUTTONS.map((btn) => (
+      {/* Center: Formatting tools - Hide on mobile and in read-only mode */}
+      {!isReadOnly && (
+        <div className="hidden lg:flex items-center justify-center shrink-0 px-2">
+          <div className="flex items-center gap-1 bg-black/20 p-1 rounded-full border border-white/5 shadow-inner">
+            {FORMAT_BUTTONS.map((btn) => (
+              <button
+                key={btn.label}
+                title={btn.title}
+                onClick={() => onFormat(btn.val, btn.block)}
+                className="bg-transparent border-none rounded-full min-w-[32px] h-8 px-2 flex items-center justify-center text-sm font-sans font-bold text-muted cursor-pointer hover:bg-white/10 hover:text-foreground transition-all duration-150"
+              >
+                {btn.label}
+              </button>
+            ))}
+            <div className="w-px h-4 bg-white/10 mx-1" />
             <button
-              key={btn.label}
-              title={btn.title}
-              onClick={() => onFormat(btn.val, btn.block)}
-              className="bg-transparent border-none rounded-full min-w-[32px] h-8 px-2 flex items-center justify-center text-sm font-sans font-bold text-muted cursor-pointer hover:bg-white/10 hover:text-foreground transition-all duration-150"
+              onClick={onTogglePreview}
+              className={`border-none rounded-full px-3 py-1 text-[11px] font-sans font-medium cursor-pointer transition-all duration-150 ${
+                preview
+                  ? 'bg-primary text-white shadow-[0_0_10px_rgba(249,115,22,0.5)]'
+                  : 'bg-transparent text-muted hover:bg-white/10 hover:text-foreground'
+              }`}
             >
-              {btn.label}
+              {preview ? 'Write' : 'Preview'}
             </button>
-          ))}
-          <div className="w-px h-4 bg-white/10 mx-1" />
-          <button
-            onClick={onTogglePreview}
-            className={`border-none rounded-full px-3 py-1 text-[11px] font-sans font-medium cursor-pointer transition-all duration-150 ${
-              preview
-                ? 'bg-primary text-white shadow-[0_0_10px_rgba(249,115,22,0.5)]'
-                : 'bg-transparent text-muted hover:bg-white/10 hover:text-foreground'
-            }`}
-          >
-            {preview ? 'Write' : 'Preview'}
-          </button>
-          <button
-            onClick={onToggleVersions}
-            className={`border-none rounded-full px-3 py-1 text-[11px] font-sans font-medium cursor-pointer transition-all duration-150 ${
-              showVersions
-                ? 'bg-primary text-white shadow-[0_0_10px_rgba(249,115,22,0.5)]'
-                : 'bg-transparent text-muted hover:bg-white/10 hover:text-foreground'
-            }`}
-          >
-            History
-          </button>
+            <button
+              onClick={onToggleVersions}
+              className={`border-none rounded-full px-3 py-1 text-[11px] font-sans font-medium cursor-pointer transition-all duration-150 ${
+                showVersions
+                  ? 'bg-primary text-white shadow-[0_0_10px_rgba(249,115,22,0.5)]'
+                  : 'bg-transparent text-muted hover:bg-white/10 hover:text-foreground'
+              }`}
+            >
+              History
+            </button>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Right: Actions & User */}
-      <div className="flex items-center justify-end gap-3 flex-1 min-w-0">
-        <div className="flex items-center gap-2 hidden sm:flex">
+      <div className="flex items-center justify-end gap-2 md:gap-3 flex-1 min-w-0">
+        <div className="flex items-center gap-1 hidden md:flex">
           {collaborators}
         </div>
 
-        <div className="h-4 w-px bg-white/10 shrink-0 hidden sm:block" />
+        <div className="h-4 w-px bg-white/10 shrink-0 hidden md:block" />
 
         <div className="relative">
           <button
@@ -135,22 +145,24 @@ export default function UnifiedHeader({
           )}
         </div>
 
-        <button
-          onClick={onShare}
-          className="glow-border relative bg-primary text-white border-none rounded-full px-4 py-1.5 text-xs font-sans font-medium cursor-pointer hover:bg-primary-hover shadow-[0_0_15px_rgba(249,115,22,0.4)] transition-all duration-200 overflow-hidden"
-        >
-          <span className="relative z-10">Share</span>
-        </button>
+        {!isReadOnly && (
+          <button
+            onClick={onShare}
+            className="bg-primary text-white border-none rounded-full px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-sans font-bold cursor-pointer hover:bg-primary-hover transition-all duration-200 shadow-lg shadow-primary/20"
+          >
+            Share
+          </button>
+        )}
 
-        <div className="h-4 w-px bg-white/10 shrink-0" />
+        <div className="h-4 w-px bg-white/10 shrink-0 hidden sm:block" />
         
         <button
           onClick={() => setDark(!dark)}
-          className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-full text-muted hover:bg-white/10 hover:text-foreground cursor-pointer transition-colors"
+          className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-full text-muted hover:bg-white/10 hover:text-foreground cursor-pointer transition-colors hidden sm:flex"
           title="Toggle Theme"
         >
           {dark ? (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <circle cx="12" cy="12" r="5"></circle>
               <line x1="12" y1="1" x2="12" y2="3"></line>
               <line x1="12" y1="21" x2="12" y2="23"></line>
@@ -162,13 +174,13 @@ export default function UnifiedHeader({
               <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
             </svg>
           ) : (
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
             </svg>
           )}
         </button>
 
-        <div className="ml-1 flex items-center">
+        <div className="flex items-center scale-90 md:scale-100">
           <UserButton afterSignOutUrl="/" />
         </div>
       </div>

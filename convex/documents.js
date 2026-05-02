@@ -1,15 +1,20 @@
+// Updated shared docs query to support email-based discovery
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
 
 export const getMyDocs = query({
-  args: { ownerId: v.string() },
+  args: { ownerId: v.string(), email: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    return await ctx.db
-      .query("documents")
-      .withIndex("by_owner", (q) => q.eq("ownerId", args.ownerId))
-      .order("desc")
-      .collect();
+    const allDocs = await ctx.db.query("documents").collect();
+    return allDocs
+      .filter((doc) => 
+        doc.ownerId === args.ownerId || 
+        (doc.collaborators && doc.collaborators.some((c) => 
+          c.userId === args.ownerId || (args.email && c.email?.toLowerCase() === args.email.toLowerCase())
+        ))
+      )
+      .sort((a, b) => b._creationTime - a._creationTime);
   },
 });
 

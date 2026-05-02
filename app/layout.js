@@ -1,5 +1,6 @@
 'use client'
 import { ClerkProvider } from '@clerk/nextjs'
+import { dark as clerkDarkTheme } from '@clerk/themes'
 import { Geist } from 'next/font/google'
 import { createContext, useContext, useState, useEffect } from 'react'
 import ConvexClientProvider from './ConvexClientProvider'
@@ -16,7 +17,7 @@ export function useTheme() {
   return useContext(ThemeContext)
 }
 
-function ThemeProvider({ children }) {
+export default function RootLayout({ children }) {
   const [dark, setDark] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -35,31 +36,33 @@ function ThemeProvider({ children }) {
   }, [dark, mounted])
 
   return (
-    <ThemeContext.Provider value={{ dark, setDark }}>
-      <div className="bg-background text-foreground min-h-screen transition-colors duration-300 ease-in-out font-sans">
-        {children}
-      </div>
-    </ThemeContext.Provider>
-  )
-}
-
-export default function RootLayout({ children }) {
-  return (
-    <ClerkProvider>
-      <html lang="en" suppressHydrationWarning>
-        <head>
-          <title>CollabDocs — Real-time Collaborative Editor</title>
-          <meta name="description" content="Write together, think together. Real-time collaborative markdown editing with live cursors, AI-powered writing assistance, and version history." />
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-        </head>
-        <body className={geist.className} style={{ margin: 0, padding: 0 }}>
-          <ConvexClientProvider>
-            <ThemeProvider>
+    <ClerkProvider
+      appearance={{
+        baseTheme: dark ? clerkDarkTheme : undefined,
+        variables: {
+          colorPrimary: '#f97316',
+        },
+        elements: {
+          footer: { display: 'none' },
+          footerAction: { display: 'none' }, // Hides the "Powered by Clerk" and similar
+          internal_branding: { display: 'none' },
+        }
+      }}
+    >
+      <ThemeContext.Provider value={{ dark, setDark }}>
+        <html lang="en" suppressHydrationWarning className={dark ? 'dark' : ''}>
+          <head>
+            <title>CollabDocs — Real-time Collaborative Editor</title>
+            <meta name="description" content="Write together, think together. Real-time collaborative markdown editing with live cursors, AI-powered writing assistance, and version history." />
+            <meta name="viewport" content="width=device-width, initial-scale=1" />
+          </head>
+          <body className={`${geist.className} bg-background text-foreground min-h-screen transition-colors duration-300 ease-in-out font-sans`} style={{ margin: 0, padding: 0 }}>
+            <ConvexClientProvider>
               {children}
-            </ThemeProvider>
-          </ConvexClientProvider>
-        </body>
-      </html>
+            </ConvexClientProvider>
+          </body>
+        </html>
+      </ThemeContext.Provider>
     </ClerkProvider>
   )
 }

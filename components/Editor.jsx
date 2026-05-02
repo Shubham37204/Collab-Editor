@@ -27,7 +27,8 @@ export default function Editor({
   docId,
   initialContent,
   title: initialTitle,
-  currentUserId,
+  user,
+  isReadOnly = false,
 }) {
   const router = useRouter();
   const { dark } = useTheme();
@@ -89,7 +90,7 @@ export default function Editor({
         docId,
         content,
         title,
-        savedBy: currentUserId || "unknown",
+        savedBy: user?.id || "unknown",
         savedByName: "Me",
       }),
     ]);
@@ -101,6 +102,8 @@ export default function Editor({
     const view = editorViewRef.current;
     if (!view) return;
     const { from, to } = view.state.selection.main;
+    if (from === to) return; // Do nothing if no text is selected
+
     const selected = view.state.doc.sliceString(from, to);
     const insert = block
       ? `${syntax}${selected}`
@@ -111,11 +114,14 @@ export default function Editor({
 
   /* ── Title save ── */
   const handleTitleChange = (value) => {
+    if (isReadOnly) return;
     setTitle(value);
     clearTimeout(titleTimerRef.current);
+    setSaving(true); // Show saving state immediately
     titleTimerRef.current = setTimeout(async () => {
       await saveTitle({ id: docId, title: value });
-    }, 800);
+      setSaving(false);
+    }, 400); // Faster debounce
   };
 
 
@@ -204,12 +210,15 @@ export default function Editor({
     const ytext = ydoc.getText("document-content");
 
     const tryInsert = () => {
-      if (!seededRef.current && ytext.length === 0 && initialContent) {
+      // Only seed if we haven't already attempted to in this session
+      // and the provider has finished syncing with Liveblocks
+      if (!seededRef.current && provider.synced) {
         seededRef.current = true;
-        ytext.insert(0, initialContent);
+        if (ytext.length === 0 && initialContent) {
+          ytext.insert(0, initialContent);
+        }
       }
     };
-    tryInsert();
     provider.on("sync", tryInsert);
 
     /* Connection status tracking */
@@ -223,40 +232,42 @@ export default function Editor({
     });
 
     const { awareness } = provider;
-    awareness.setLocalStateField("user", { name: "Me", color: "var(--primary-color)" });
+    awareness.setLocalStateField("user", { 
+      name: user?.fullName || user?.firstName || "Anonymous", 
+      avatar: user?.imageUrl,
+      color: "var(--primary-color)" 
+    });
 
     const lightTheme = EditorView.theme({
-      "&": { background: "transparent", color: "var(--fg-color)", fontSize: "15px", fontFamily: "'Georgia', serif" },
+      "&": { background: "transparent", color: "var(--fg-color)", fontSize: "19px", fontFamily: "'Inter', system-ui, sans-serif" },
       ".cm-content": { padding: "16px 0", caretColor: "var(--primary-color)" },
-      ".cm-line": { padding: "0 0 3px 0", lineHeight: "1.8" },
-      ".cm-cursor": { borderLeftColor: "var(--primary-color)" },
-      ".cm-selectionBackground": { background: "color-mix(in srgb, var(--primary-color) 20%, transparent) !important" },
+      ".cm-line": { padding: "0 0 6px 0", lineHeight: "1.7" },
+      ".cm-cursor": { borderLeft: "2px solid var(--primary-color)", animation: "cm-blink 1.2s steps(1) infinite" },
+      ".cm-selectionBackground": { background: "color-mix(in srgb, var(--primary-color) 25%, transparent) !important" },
       ".cm-gutters": { display: "none" },
-      ".cm-activeLineGutter": { display: "none" },
       ".cm-activeLine": { background: "transparent" },
       "&.cm-focused": { outline: "none" },
       ".cm-scroller": { overflow: "auto" },
-      ".cm-strong": { fontWeight: "bold", color: "var(--fg-color)" },
+      ".cm-strong": { fontWeight: "700", color: "var(--fg-color)" },
       ".cm-em": { fontStyle: "italic" },
-      ".cm-heading": { fontWeight: "bold", color: "var(--primary-color)" },
-      ".cm-placeholder": { color: "var(--muted-color)", fontStyle: "italic", fontSize: "1.1rem", opacity: "0.7" }
+      ".cm-heading": { fontWeight: "800", color: "var(--primary-color)", lineHeight: "1.3" },
+      ".cm-placeholder": { color: "var(--muted-color)", fontStyle: "normal", fontSize: "1.2rem", opacity: "0.5" }
     });
 
     const darkTheme = EditorView.theme(
       {
-        "&": { backgroundColor: "transparent !important", color: "var(--fg-color)", fontSize: "15px", fontFamily: "'Georgia', serif" },
+        "&": { backgroundColor: "transparent !important", color: "var(--fg-color)", fontSize: "19px", fontFamily: "'Inter', system-ui, sans-serif" },
         ".cm-content": { padding: "0", caretColor: "var(--primary-color)" },
-        ".cm-line": { padding: "0 0 2px 0", lineHeight: "1.8" },
-        ".cm-cursor": { borderLeftColor: "var(--primary-color)" },
-        ".cm-selectionBackground": { background: "color-mix(in srgb, var(--primary-color) 20%, transparent) !important" },
+        ".cm-line": { padding: "0 0 6px 0", lineHeight: "1.7" },
+        ".cm-cursor": { borderLeft: "2px solid var(--primary-color)", animation: "cm-blink 1.2s steps(1) infinite" },
+        ".cm-selectionBackground": { background: "color-mix(in srgb, var(--primary-color) 25%, transparent) !important" },
         ".cm-gutters": { display: "none" },
-        ".cm-activeLineGutter": { display: "none" },
         ".cm-activeLine": { background: "transparent" },
         "&.cm-focused": { outline: "none" },
-        ".cm-strong": { fontWeight: "bold", color: "var(--fg-color)" },
+        ".cm-strong": { fontWeight: "700", color: "var(--fg-color)" },
         ".cm-em": { fontStyle: "italic" },
-        ".cm-heading": { fontWeight: "bold", color: "var(--primary-color)" },
-        ".cm-placeholder": { color: "var(--muted-color)", fontStyle: "italic", fontSize: "1.1rem", opacity: "0.7" }
+        ".cm-heading": { fontWeight: "800", color: "var(--primary-color)", lineHeight: "1.3" },
+        ".cm-placeholder": { color: "var(--muted-color)", fontStyle: "normal", fontSize: "1.2rem", opacity: "0.5" }
       },
       { dark: true },
     );
@@ -266,7 +277,9 @@ export default function Editor({
       extensions: [
         basicSetup,
         markdown(),
-        placeholder("Start writing your document here..."),
+        EditorState.readOnly.of(isReadOnly),
+        EditorView.editable.of(!isReadOnly),
+        placeholder(isReadOnly ? "" : "Start writing your document here..."),
         dark ? [oneDark, darkTheme] : lightTheme,
         yCollab(ytext, awareness),
         EditorView.updateListener.of((update) => {
@@ -321,6 +334,7 @@ export default function Editor({
         onSave={handleManualSave}
         onShare={() => setShowShare(true)}
         saving={saving}
+        isReadOnly={isReadOnly}
         collaborators={<CollaboratorAvatars others={others} />}
       />
 
@@ -410,7 +424,7 @@ export default function Editor({
         open={showShare}
         onClose={() => setShowShare(false)}
         doc={{ _id: docId, title: title, collaborators: [] }}
-        user={{ id: currentUserId, emailAddresses: [] }}
+        user={user}
         onShare={handleShare}
       />
 

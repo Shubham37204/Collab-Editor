@@ -44,10 +44,22 @@ export default function EditorPage() {
     </div>
   )
 
+  const userEmail = user?.emailAddresses[0]?.emailAddress?.toLowerCase();
+  const isOwner = doc.ownerId === user?.id;
+  const collab = doc.collaborators?.find(c => 
+    c.userId === user?.id || c.email?.toLowerCase() === userEmail
+  );
+  const role = isOwner ? 'editor' : (collab?.role || 'viewer');
+  const isReadOnly = role === 'viewer';
+
   return (
     <RoomProvider
       id={`doc-${id}`}
-      initialPresence={{ name: user?.firstName || 'Anonymous', cursor: null }}
+      initialPresence={{ 
+        name: user?.fullName || user?.firstName || 'Anonymous', 
+        avatar: user?.imageUrl,
+        cursor: null 
+      }}
     >
       <ClientSideSuspense fallback={
         <div className="min-h-screen flex flex-col items-center justify-center bg-background">
@@ -60,7 +72,8 @@ export default function EditorPage() {
             docId={id}
             initialContent={doc.content}
             title={doc.title}
-            currentUserId={user?.id}
+            user={user}
+            isReadOnly={isReadOnly}
           />
         )}
       </ClientSideSuspense>

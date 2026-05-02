@@ -87,6 +87,11 @@
   50% { opacity: 1; transform: scale(1.1); }
 }
 
+@keyframes cm-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /* ── Base ── */
 * {
   box-sizing: border-box;
@@ -160,8 +165,18 @@ body {
 [data-liveblocks-portal],
 [data-liveblocks-overlay],
 .__liveblocks_overlay__,
-[class*="liveblocks-"]:not([class*="liveblocks-provider"]) {
+[class*="liveblocks-"]:not([class*="liveblocks-provider"]),
+.lb-root,
+.lb-portal,
+.lb-branding,
+[href*="liveblocks.io"],
+img[alt*="liveblocks"],
+div[class*="branding"],
+div[id*="branding"] {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 /* ── CodeMirror ── */
@@ -386,4 +401,40 @@ a, button {
   .preview-content blockquote {
     page-break-inside: avoid;
   }
+}
+/* -- Editor Clean Mode -- */
+.cm-formatting {
+  opacity: 0 !important;
+  display: inline-block;
+  width: 0;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.cm-activeLine .cm-formatting,
+.cm-line:hover .cm-formatting {
+  opacity: 0.4 !important;
+  width: auto;
+  margin: 0 2px;
+}
+
+/* -- Ultra Clean Markdown Mode -- */
+.cm-formatting-strong, .cm-formatting-em, .cm-formatting-header {
+  font-size: 0 !important;
+  letter-spacing: -1.2ch !important;
+  opacity: 0 !important;
+  display: inline-block !important;
+  width: 0 !important;
+  pointer-events: none !important;
+  transition: all 0.2s;
+}
+
+.cm-activeLine .cm-formatting-strong, 
+.cm-activeLine .cm-formatting-em,
+.cm-activeLine .cm-formatting-header {
+  font-size: inherit !important;
+  letter-spacing: normal !important;
+  opacity: 0.3 !important;
+  width: auto !important;
+  pointer-events: auto !important;
 }

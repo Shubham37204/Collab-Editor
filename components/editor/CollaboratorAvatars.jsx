@@ -8,18 +8,22 @@ export default function CollaboratorAvatars({ others }) {
       {others.slice(0, 4).map((other, i) => (
         <div
           key={i}
-          title={other.info?.name || 'Collaborator'}
-          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 cursor-default"
+          title={other.presence?.name || 'Collaborator'}
+          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border-2 cursor-default overflow-hidden bg-background"
           style={{
-            background: (other.info?.color || '#888') + '33',
-            borderColor: other.info?.color || '#888',
-            color: other.info?.color || 'inherit',
+            borderColor: 'var(--primary-color)',
             marginLeft: i === 0 ? 0 : '-8px',
             position: 'relative',
             zIndex: 4 - i,
           }}
         >
-          {(other.info?.name?.[0] || '?').toUpperCase()}
+          {other.presence?.avatar ? (
+            <img src={other.presence.avatar} alt="" className="w-full h-full object-cover" />
+          ) : (
+            <span style={{ color: 'var(--primary-color)' }}>
+              {(other.presence?.name?.[0] || '?').toUpperCase()}
+            </span>
+          )}
         </div>
       ))}
       <span className="text-xs text-muted font-sans ml-2">

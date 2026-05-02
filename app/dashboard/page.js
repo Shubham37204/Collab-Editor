@@ -33,7 +33,10 @@ export default function DashboardPage() {
   const [showShare, setShowShare] = useState(false);
   const [shareDocId, setShareDocId] = useState(null);
 
-  const docs = useQuery(api.documents.getMyDocs, { ownerId: user?.id ?? "" });
+  const docs = useQuery(api.documents.getMyDocs, { 
+    ownerId: user?.id ?? "",
+    email: user?.emailAddresses[0]?.emailAddress ?? ""
+  });
   const notifications = useQuery(api.notifications.getMyNotifications, {
     userId: user?.id ?? "",
   });
