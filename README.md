@@ -1,133 +1,223 @@
-# 🚀 Collab Editor — Real-Time Document Collaboration Platform
+# CollabDocs — Real-Time Collaborative Document Editor
 
-A modern **real-time collaborative document editor** built with **Next.js, Convex, and React**, enabling users to create, edit, share, and manage documents seamlessly.
+A production-grade collaborative document editor built with **Next.js**, **Convex**, **Liveblocks**, **Clerk**, and **Groq**. Enables teams to co-edit documents simultaneously with live cursor presence, conflict-free sync, AI-powered writing assistance, and version history — all backed by a reactive serverless architecture.
 
+---
 
-## ✨ Features
-
-* 📝 Create and manage documents
-* ⚡ Real-time updates using Convex
-* 👥 Collaborator support (viewer/editor roles)
-* ⭐ Star / favorite important documents
-* 🔔 Notification system for collaboration events
-* 🕒 Version history tracking
-* 🌐 Public & private document access
-* 🎯 Clean and responsive UI
-
-
-## 🛠️ Tech Stack
-
-* **Frontend:** Next.js (App Router), React
-* **Backend:** Convex (serverless database + functions)
-* **State Management:** Convex reactive queries
-* **Styling:** Tailwind CSS
-* **Authentication:** Clerk (if used)
-
-
-## 📁 Project Structure
+## Architecture Overview
 
 ```
-app/            # Next.js routes
-components/     # Reusable UI components
-convex/         # Backend (queries, mutations, schema)
-lib/            # Utility functions
-public/         # Static assets
+┌─────────────────────────────────────────────────────────────┐
+│                        Client (Next.js)                     │
+│  Tiptap Editor ─── Liveblocks Provider ─── Convex Client   │
+└────────────┬───────────────────┬──────────────────┬─────────┘
+             │                   │                  │
+    ┌────────▼──────┐   ┌────────▼──────┐  ┌───────▼────────┐
+    │  Liveblocks   │   │  Convex DB    │  │  Clerk Auth    │
+    │  (WebSocket / │   │  (Serverless  │  │  (JWT / OAuth) │
+    │   Y.js CRDT)  │   │   Queries +   │  └────────────────┘
+    └───────────────┘   │   Mutations)  │
+                        └───────┬───────┘
+                                │
+                       ┌────────▼──────┐
+                       │  Groq API     │
+                       │  (LLaMA 3     │
+                       │   Streaming)  │
+                       └───────────────┘
 ```
 
+**Sync model:** Liveblocks manages real-time document state via Y.js CRDT over WebSocket. Convex handles persistent storage — document metadata, versions, collaborator roles, and notifications — via reactive subscriptions. These two layers are intentionally decoupled: presence and conflict resolution live in Liveblocks; durability and access control live in Convex.
 
-## ⚙️ Setup & Installation
+---
 
-### 1️⃣ Clone the repository
+## Features
+
+### Real-Time Collaboration
+- Simultaneous multi-user editing with conflict-free merge via **Y.js CRDT**
+- Live cursor presence with per-user color identity
+- WebSocket-based sync with automatic reconnection
+
+### AI Writing Assistant (Groq LLaMA 3)
+- Inline AI panel triggered via slash command or selection
+- **6 context-aware actions:** Summarize, Continue, Rewrite, Simplify, Fix Grammar, Translate
+- Streaming response rendered token-by-token in the editor
+
+### Document Management
+- Create, rename, delete, and organize documents
+- Public / private access control per document
+- Star / favorite documents for quick access
+- Full-text document listing with search
+
+### Collaboration & Roles
+- Invite collaborators by email
+- Role-based access: `viewer` / `editor`
+- Notification system for collaboration events (invite, edit, restore)
+
+### Rich Editor Experience
+- Slash commands (`/`) for blocks: headings, lists, code, dividers, images
+- Table of Contents with scroll-spy
+- PDF and Markdown export
+- Auto-save on every change via Convex mutations
+
+### Version History
+- Snapshot-based version saving
+- Version restore with diff preview
+- Timestamped history log per document
+
+---
+
+## Tech Stack
+
+| Layer | Technology | Role |
+|---|---|---|
+| Frontend | Next.js 14 (App Router) | Routing, SSR, UI |
+| Editor | Tiptap | Rich text + extension system |
+| Real-time Sync | Liveblocks + Y.js | CRDT conflict resolution, presence |
+| Database | Convex | Serverless DB + reactive queries |
+| Auth | Clerk | JWT auth, OAuth, session management |
+| AI | Groq (LLaMA 3) | Streaming AI writing assistant |
+| Styling | Tailwind CSS | Utility-first styling |
+| Deployment | Vercel | Frontend hosting |
+
+---
+
+## Project Structure
 
 ```
-git clone https://github.com/your-username/collab-editor.git
+collab-editor/
+├── app/                        # Next.js App Router
+│   ├── (auth)/                 # Sign-in / sign-up routes (Clerk)
+│   ├── (root)/                 # Main app layout
+│   │   ├── documents/          # Document listing + management
+│   │   └── documents/[id]/     # Document editor page
+│   └── api/                    # API routes (Groq streaming endpoint)
+│       └── ai/route.ts
+│
+├── components/
+│   ├── editor/                 # Tiptap editor + extensions
+│   │   ├── Editor.tsx          # Core editor component
+│   │   ├── AIPanel.tsx         # Groq inline assistant
+│   │   ├── Toolbar.tsx         # Formatting toolbar
+│   │   └── TOC.tsx             # Table of contents + scroll-spy
+│   ├── collaboration/
+│   │   ├── ActiveUsers.tsx     # Live cursor presence
+│   │   └── ShareModal.tsx      # Collaborator invite + role assign
+│   ├── documents/
+│   │   ├── DocumentList.tsx    # Document grid / list
+│   │   ├── VersionHistory.tsx  # Version log + restore UI
+│   │   └── ExportMenu.tsx      # PDF / MD export
+│   └── ui/                     # Shared UI primitives
+│
+├── convex/
+│   ├── schema.ts               # DB schema (documents, collaborators, versions, notifications)
+│   ├── documents.ts            # CRUD queries + mutations
+│   ├── collaborators.ts        # Role management
+│   ├── versions.ts             # Version save + restore
+│   └── notifications.ts        # Notification fan-out logic
+│
+├── lib/
+│   ├── liveblocks.ts           # Liveblocks client config
+│   ├── groq.ts                 # Groq client + prompt templates
+│   └── export.ts               # PDF / Markdown export utilities
+│
+└── public/                     # Static assets
+```
+
+---
+
+## Local Setup
+
+### Prerequisites
+- Node.js 18+
+- Convex account
+- Clerk account
+- Liveblocks account
+- Groq API key
+
+### 1. Clone
+
+```bash
+git clone https://github.com/Shubham37204/collab-editor.git
 cd collab-editor
-```
-
-
-### 2️⃣ Install dependencies
-
-```
 npm install
 ```
 
+### 2. Environment Variables
 
-### 3️⃣ Setup environment variables
+Create `.env.local`:
 
-Create a `.env.local` file:
-
-```
-# Deployment used by `npx convex dev`
+```env
+# Convex
 CONVEX_DEPLOYMENT=
 NEXT_PUBLIC_CONVEX_URL=
-NEXT_PUBLIC_CONVEX_SITE_URL=
 
-
-# Get these from clerk.com → Create app → API Keys
+# Clerk
 NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=
 CLERK_SECRET_KEY=
+NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
+NEXT_PUBLIC_CLERK_SIGN_UP_URL=/sign-up
+NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=/
+NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=/
 
-NEXT_PUBLIC_CLERK_SIGN_IN_URL=
-NEXT_PUBLIC_CLERK_SIGN_UP_URL=
-NEXT_PUBLIC_CLERK_AFTER_SIGN_IN_URL=
-NEXT_PUBLIC_CLERK_AFTER_SIGN_UP_URL=
-
-
+# Liveblocks
 NEXT_PUBLIC_LIVEBLOCKS_PUBLIC_KEY=
 LIVEBLOCKS_SECRET_KEY=
 
+# Groq
 GROQ_API_KEY=
-
 ```
 
+### 3. Start Convex backend
 
-### 4️⃣ Run Convex backend
-
-```
+```bash
 npx convex dev
 ```
 
+### 4. Start frontend
 
-### 5️⃣ Run frontend
-
-```
+```bash
 npm run dev
 ```
 
+App runs at `http://localhost:3000`
 
-### 6️⃣ Open in browser
+---
 
-```
-http://localhost:3000
-```
+## AI Assistant — How It Works
 
+The AI panel uses **Groq's LLaMA 3** via a Next.js streaming API route (`/api/ai`). When a user triggers an action:
 
-## 🔄 Core Functionalities
+1. Selected text + document context are sent to `/api/ai`
+2. Server streams tokens via `ReadableStream` back to the client
+3. Tokens are rendered progressively into the editor
 
-### 📄 Document Management
+Each action uses a distinct system prompt:
 
-* Create, update, delete documents
-* Auto-save content in real-time
+| Action | Behavior |
+|---|---|
+| Summarize | Condense selected text into key points |
+| Continue | Generate coherent continuation of selection |
+| Rewrite | Rephrase with same meaning, improved clarity |
+| Simplify | Reduce complexity for a general audience |
+| Fix Grammar | Correct grammar and punctuation |
+| Translate | Translate to a specified language |
 
-### 👥 Collaboration
+---
 
-* Add users as collaborators
-* Assign roles: `viewer` / `editor`
+## Collaboration Model — How It Works
 
-### ⭐ Starred Documents
+Liveblocks creates a **room** per document (`room-{documentId}`). Each connected client:
 
-* Mark important documents
-* Quick access filtering
+- Joins via a server-authenticated Liveblocks token (validated against Clerk session)
+- Shares Y.js document state via Liveblocks' CRDT layer
+- Broadcasts cursor position + selection as **awareness state**
 
-### 🔔 Notifications
+Convex stores the authoritative document snapshot independently. On session end or explicit save, the editor content is persisted to Convex via a `updateDocument` mutation.
 
-* Get notified when:
+This dual-layer design ensures:
+- **Real-time edits** don't block on DB writes
+- **Persistence** is decoupled from sync latency
+- **Access control** is enforced at the Convex layer (role check before mutation)
 
-  * Added as collaborator
-  * Document updates
+---
 
-### 🕒 Version Control
-
-* Save document versions
-* View last changes
-  
