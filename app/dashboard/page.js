@@ -10,7 +10,7 @@ import ShareDocModal from "../../components/dashboard/ShareDocModal";
 import EmptyState from "../../components/dashboard/EmptyState";
 import DocCard from "../../components/DocCard";
 
-/* ── Skeleton loader ── */
+
 function DocCardSkeleton() {
   return (
     <div className="glass-panel flex flex-col justify-between p-6 rounded-2xl min-h-[160px]">
@@ -50,7 +50,7 @@ export default function DashboardPage() {
     if (isLoaded && !isSignedIn) router.push("/");
   }, [isLoaded, isSignedIn, router]);
 
-  /* ── Handlers ── */
+
   const handleCreateDoc = async (title, templateContent) => {
     setCreating(true);
     const docTitle = title.trim() || "Untitled Document";
@@ -83,7 +83,7 @@ export default function DashboardPage() {
     if (user?.id) markAllRead({ userId: user.id });
   };
 
-  /* ── Derived data ── */
+
   const filteredDocs =
     docs
       ?.filter((d) => d.title.toLowerCase().includes(search.toLowerCase()))
@@ -92,7 +92,7 @@ export default function DashboardPage() {
   const unreadCount = notifications?.filter((n) => !n.read).length ?? 0;
   const shareDoc = docs?.find((d) => d._id === shareDocId);
 
-  /* ── Loading state ── */
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-background">
@@ -113,7 +113,7 @@ export default function DashboardPage() {
         onMarkAllRead={handleMarkAllRead}
       />
 
-      {/* Main content */}
+
       <main className="flex-1 max-w-6xl mx-auto px-8 py-14 relative z-10 w-full">
         <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full -z-10 pointer-events-none" />
         {/* Title row */}
@@ -129,9 +129,8 @@ export default function DashboardPage() {
           )}
         </div>
 
-        {/* Document list */}
+
         {docs === undefined ? (
-          /* Skeleton loading */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fade-in">
             {[...Array(6)].map((_, i) => (
               <DocCardSkeleton key={i} />
@@ -164,7 +163,6 @@ export default function DashboardPage() {
         )}
       </main>
 
-      {/* Modals */}
       <CreateDocModal
         open={showModal}
         onClose={() => setShowModal(false)}

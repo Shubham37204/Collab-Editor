@@ -80,7 +80,6 @@ export default function Editor({
     [docId, saveContent],
   );
 
-  /* ── Manual save + version ── */
   const handleManualSave = async () => {
     setSaving(true);
     await Promise.all([
@@ -97,12 +96,12 @@ export default function Editor({
     setSaving(false);
   };
 
-  /* ── Formatting ── */
+
   const handleFormat = (syntax, block = false) => {
     const view = editorViewRef.current;
     if (!view) return;
     const { from, to } = view.state.selection.main;
-    if (from === to) return; // Do nothing if no text is selected
+    if (from === to) return; 
 
     const selected = view.state.doc.sliceString(from, to);
     const insert = block
@@ -112,21 +111,20 @@ export default function Editor({
     view.focus();
   };
 
-  /* ── Title save ── */
+
   const handleTitleChange = (value) => {
     if (isReadOnly) return;
     setTitle(value);
     clearTimeout(titleTimerRef.current);
-    setSaving(true); // Show saving state immediately
+    setSaving(true); 
     titleTimerRef.current = setTimeout(async () => {
       await saveTitle({ id: docId, title: value });
       setSaving(false);
-    }, 400); // Faster debounce
+    }, 400); 
   };
 
 
 
-  /* ── Export ── */
   const handleExportMD = () => {
     const blob = new Blob([content], { type: "text/markdown" });
     const url = URL.createObjectURL(blob);
@@ -154,7 +152,6 @@ export default function Editor({
     });
   };
 
-  /* ── Slash commands ── */
   const handleSlashCommand = (cmd) => {
     const view = editorViewRef.current;
     if (!view) return;
@@ -165,7 +162,6 @@ export default function Editor({
     setSlashMenu(null);
   };
 
-  /* ── Keyboard shortcuts ── */
   useEffect(() => {
     const handler = (e) => {
       const mod = e.metaKey || e.ctrlKey;
@@ -200,7 +196,7 @@ export default function Editor({
     return () => window.removeEventListener("keydown", handler);
   }, []);
 
-  /* ── CodeMirror + Y.js ── */
+
   useEffect(() => {
     if (!editorContainerRef.current) return;
 
@@ -210,8 +206,6 @@ export default function Editor({
     const ytext = ydoc.getText("document-content");
 
     const tryInsert = () => {
-      // Only seed if we haven't already attempted to in this session
-      // and the provider has finished syncing with Liveblocks
       if (!seededRef.current && provider.synced) {
         seededRef.current = true;
         if (ytext.length === 0 && initialContent) {
@@ -221,7 +215,6 @@ export default function Editor({
     };
     provider.on("sync", tryInsert);
 
-    /* Connection status tracking */
     const updateStatus = () => {
       const status = provider.synced ? "connected" : "reconnecting";
       setConnectionStatus(status);
@@ -338,14 +331,11 @@ export default function Editor({
         collaborators={<CollaboratorAvatars others={others} />}
       />
 
-      {/* Main editor area */}
       <div className="flex-1 flex overflow-hidden relative">
-        {/* Table of contents */}
         {preview && !focusMode && (
           <TableOfContents content={content} previewRef={previewPanelRef} />
         )}
 
-        {/* CodeMirror */}
         <div
           ref={editorContainerRef}
           className={`flex-1 overflow-auto text-sm flex flex-col pt-32 pb-24 ${
@@ -357,15 +347,12 @@ export default function Editor({
           }`}
         />
 
-        {/* Split preview */}
         {preview && !focusMode && (
           <SplitPreview ref={previewPanelRef} content={content} />
         )}
 
-        {/* Full preview (focus mode) */}
         {preview && focusMode && <FullPreview content={content} />}
 
-        {/* Version history panel */}
         {showVersions && (
           <VersionPanel
             docId={docId}
@@ -387,7 +374,6 @@ export default function Editor({
         )}
       </div>
 
-      {/* Focus mode exit */}
       {focusMode && (
         <button
           onClick={() => setFocusMode(false)}

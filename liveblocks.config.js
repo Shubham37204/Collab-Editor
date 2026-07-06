@@ -26,7 +26,7 @@ export const {
   useSelf,
 } = createRoomContext(client)
 
-// Suppress dev overlay
+
 if (typeof window !== 'undefined') {
   const observer = new MutationObserver(() => {
     document.querySelectorAll('[data-liveblocks-portal], .lb-root, .lb-portal, .lb-branding, [class*="lb-badge"], [href*="liveblocks.io"]').forEach(el => {

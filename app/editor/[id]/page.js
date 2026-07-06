@@ -14,7 +14,7 @@ export default function EditorPage() {
   const { user, isLoaded } = useUser()
   const doc      = useQuery(api.documents.getDocById, { id })
 
-  /* Loading state */
+
   if (!isLoaded || doc === undefined) return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-background">
       <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -22,7 +22,7 @@ export default function EditorPage() {
     </div>
   )
 
-  /* Not found state */
+
   if (doc === null) return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <div className="text-center animate-fade-in">

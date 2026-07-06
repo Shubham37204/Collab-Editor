@@ -1,4 +1,3 @@
-// Updated shared docs query to support email-based discovery
 import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -18,7 +17,7 @@ export const getMyDocs = query({
   },
 });
 
-// DELETE a document
+
 export const deleteDoc = mutation({
   args: { id: v.id("documents") },
   handler: async (ctx, args) => {

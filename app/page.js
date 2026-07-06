@@ -21,7 +21,6 @@ export default function HomePage() {
 
   return (
     <main className="min-h-screen bg-background text-foreground font-sans relative transition-colors duration-300">
-      {/* Background decorations */}
       <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-gradient-to-br from-primary/30 via-orange-500/10 to-transparent rounded-full blur-[100px] opacity-70 -z-10 animate-pulse pointer-events-none" />
       <div className="absolute bottom-0 left-[-20%] w-[600px] h-[600px] bg-gradient-to-tr from-primary/20 to-transparent rounded-full blur-[100px] opacity-50 -z-10 pointer-events-none" />
 

@@ -31,7 +31,6 @@ export default function CreateDocModal({ open, onClose, onCreate, creating }) {
       }}
     >
       <div className="bg-card border border-border rounded-2xl p-8 w-full max-w-lg animate-scale-in">
-        {/* Header */}
         <div className="flex justify-between items-center mb-6">
           <h3 className="font-serif text-xl font-normal text-foreground m-0">
             New document
@@ -44,7 +43,6 @@ export default function CreateDocModal({ open, onClose, onCreate, creating }) {
           </button>
         </div>
 
-        {/* Title input */}
         <input
           value={title}
           onChange={(e) => setTitle(e.target.value)}
@@ -54,7 +52,6 @@ export default function CreateDocModal({ open, onClose, onCreate, creating }) {
           autoFocus
         />
 
-        {/* Template selection */}
         <div className="mb-6">
           <p className="text-xs font-sans text-muted uppercase tracking-wider font-medium mb-3">
             Choose a template
@@ -82,7 +79,6 @@ export default function CreateDocModal({ open, onClose, onCreate, creating }) {
           </div>
         </div>
 
-        {/* Actions */}
         <div className="flex justify-end gap-2.5">
           <button
             onClick={() => { onClose(); setTitle('') }}

@@ -17,7 +17,6 @@ export default function DashboardHeader({
 
   return (
     <header className="flex items-center justify-between px-6 md:px-12 py-3 border-b border-border bg-background sticky top-0 z-20 transition-colors duration-300">
-      {/* Logo */}
       <div
         className="flex items-center gap-2.5 cursor-pointer hover:opacity-80 transition-opacity"
         onClick={() => router.push('/')}
@@ -36,9 +35,7 @@ export default function DashboardHeader({
         </span>
       </div>
 
-      {/* Right controls */}
       <div className="flex items-center gap-3">
-        {/* Search */}
         <input
           className="bg-badge border border-border/60 text-foreground font-sans text-sm outline-none rounded-full py-1.5 px-5 w-64 placeholder:text-muted focus:border-primary/50 focus:ring-1 focus:ring-primary/20 transition-all duration-200"
           placeholder="Search documents..."
@@ -46,14 +43,12 @@ export default function DashboardHeader({
           onChange={(e) => onSearchChange(e.target.value)}
         />
 
-        {/* Notifications */}
         <NotificationDropdown
           notifications={notifications}
           unreadCount={unreadCount}
           onMarkAllRead={onMarkAllRead}
         />
 
-        {/* Theme toggle */}
         <button
           onClick={() => setDark(!dark)}
           className="bg-badge border border-border rounded-full px-3.5 py-1.5 text-xs font-sans text-muted hover:text-foreground hover:border-muted transition-all duration-200 cursor-pointer"
@@ -61,7 +56,6 @@ export default function DashboardHeader({
           {dark ? '☀ Light' : '☾ Dark'}
         </button>
 
-        {/* User */}
         <div className="flex items-center gap-2">
           <span className="text-sm text-muted font-sans hidden sm:inline-block">
             {user?.firstName}

@@ -21,14 +21,13 @@ export default function RootLayout({ children }) {
   const [dark, setDark] = useState(false)
   const [mounted, setMounted] = useState(false)
 
-  // Hydrate from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('collabdocs-theme')
     if (saved === 'dark') setDark(true)
     setMounted(true)
   }, [])
 
-  // Sync dark class + persist
+
   useEffect(() => {
     if (!mounted) return
     document.documentElement.classList.toggle('dark', dark)
@@ -44,7 +43,7 @@ export default function RootLayout({ children }) {
         },
         elements: {
           footer: { display: 'none' },
-          footerAction: { display: 'none' }, // Hides the "Powered by Clerk" and similar
+          footerAction: { display: 'none' }, 
           internal_branding: { display: 'none' },
         }
       }}

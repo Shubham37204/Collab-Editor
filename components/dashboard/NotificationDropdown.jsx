@@ -11,7 +11,6 @@ export default function NotificationDropdown({
   const ref = useRef(null)
   const router = useRouter()
 
-  // Close on outside click
   useEffect(() => {
     const handler = (e) => {
       if (ref.current && !ref.current.contains(e.target)) setOpen(false)
@@ -27,7 +26,6 @@ export default function NotificationDropdown({
 
   return (
     <div ref={ref} className="relative">
-      {/* Bell button */}
       <button
         onClick={handleToggle}
         className={`relative p-1.5 border rounded-lg text-muted hover:text-foreground transition-all duration-200 cursor-pointer ${
@@ -45,10 +43,8 @@ export default function NotificationDropdown({
         )}
       </button>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute right-0 top-11 bg-card border border-border rounded-xl w-72 max-h-80 overflow-auto z-50 shadow-lg animate-slide-down">
-          {/* Header */}
           <div className="flex justify-between items-center px-4 py-3 border-b border-border">
             <span className="text-sm font-medium text-foreground font-sans">
               Notifications
@@ -60,7 +56,6 @@ export default function NotificationDropdown({
             )}
           </div>
 
-          {/* Items */}
           {!notifications || notifications.length === 0 ? (
             <div className="py-8 text-center text-muted text-sm font-sans">
               No notifications yet

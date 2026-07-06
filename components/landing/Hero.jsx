@@ -9,7 +9,6 @@ export default function Hero() {
   return (
     <section className="max-w-7xl mx-auto px-6 pt-24 pb-20 animate-fade-in">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        {/* Left Column */}
         <div className="text-left">
           <h1 className="text-5xl md:text-[5.5rem] font-black leading-[1.05] tracking-tight mb-6 font-sans text-foreground">
             One editor.<br />
@@ -41,7 +40,6 @@ export default function Hero() {
             </button>
           </div>
           
-          {/* Avatars */}
           <div className="flex items-center gap-4">
             <div className="flex -space-x-3">
               <div className="w-8 h-8 rounded-full bg-orange-500 border-2 border-background flex items-center justify-center text-[10px] text-white font-bold">A</div>
@@ -53,7 +51,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Right Column (Graphic) */}
+
         <div className="relative w-full aspect-square max-w-md mx-auto lg:max-w-none">
           <div className="absolute inset-0 bg-gradient-to-tr from-yellow-200/50 via-orange-300/50 to-green-200/50 dark:from-yellow-500/20 dark:via-orange-500/20 dark:to-green-500/20 rounded-[40%_60%_70%_30%/40%_50%_60%_50%] blur-3xl" />
           
@@ -61,7 +59,6 @@ export default function Hero() {
             <span className="text-3xl text-white">✨</span>
           </div>
           
-          {/* Floating Icons */}
           <div className="absolute top-1/4 left-1/4 w-14 h-14 bg-background border border-border rounded-2xl flex items-center justify-center shadow-lg animate-bounce z-10" style={{ animationDuration: '3s' }}>
             <span className="text-xl text-red-500">🛡️</span>
           </div>

@@ -34,12 +34,11 @@ export default function SlashCommandMenu({ position, filter, onSelect }) {
         left: Math.min(position.left, window.innerWidth - 220),
       }}
     >
-      {/* Header */}
+
       <div className="px-3 py-1.5 text-[10px] text-muted font-sans tracking-wider uppercase border-b border-border">
         Insert block
       </div>
 
-      {/* Commands */}
       {filtered.map((cmd) => (
         <button
           key={cmd.label}

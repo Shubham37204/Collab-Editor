@@ -38,7 +38,6 @@ export default function UnifiedHeader({
 
   return (
     <div className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-[100] glass-panel rounded-2xl md:rounded-full px-3 md:px-4 py-2 flex items-center justify-between gap-2 md:gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] w-[95%] max-w-4xl border border-white/10 backdrop-blur-xl transition-all duration-300">
-      {/* Left: Back button & Title */}
       <div className="flex items-center gap-1 md:gap-2 flex-1 min-w-0">
         <button
           onClick={() => router.push('/dashboard')}
@@ -68,7 +67,6 @@ export default function UnifiedHeader({
         )}
       </div>
 
-      {/* Center: Formatting tools - Hide on mobile and in read-only mode */}
       {!isReadOnly && (
         <div className="hidden lg:flex items-center justify-center shrink-0 px-2">
           <div className="flex items-center gap-1 bg-black/20 p-1 rounded-full border border-white/5 shadow-inner">
@@ -107,7 +105,6 @@ export default function UnifiedHeader({
         </div>
       )}
 
-      {/* Right: Actions & User */}
       <div className="flex items-center justify-end gap-2 md:gap-3 flex-1 min-w-0">
         <div className="flex items-center gap-1 hidden md:flex">
           {collaborators}

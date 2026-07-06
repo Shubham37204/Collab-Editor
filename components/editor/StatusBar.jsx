@@ -21,7 +21,6 @@ export default function StatusBar({ wordCount, onShowShortcuts, connectionStatus
         <span>{wordCount} words</span>
         <span>{readTime} min read</span>
 
-        {/* Connection status indicator */}
         {connectionStatus && (
           <span className="flex items-center gap-1.5">
             <span className={`w-1.5 h-1.5 rounded-full ${statusColor[connectionStatus] || 'bg-muted'}`} />

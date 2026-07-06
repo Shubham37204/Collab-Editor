@@ -29,7 +29,6 @@ export default function EditorToolbar({
 
   return (
     <div className="flex items-center gap-1 px-4 py-1.5 border-b border-border bg-surface shrink-0 flex-wrap" data-no-print>
-      {/* Format buttons */}
       {FORMAT_BUTTONS.map((btn) => (
         <button
           key={btn.label}
@@ -41,10 +40,7 @@ export default function EditorToolbar({
         </button>
       ))}
 
-      {/* Divider */}
       <div className="w-px h-4 bg-border shrink-0 mx-1" />
-
-      {/* View buttons */}
       <button
         onClick={onTogglePreview}
         className={`border rounded px-2.5 py-1 text-xs font-mono cursor-pointer transition-all duration-150 ${
@@ -75,14 +71,12 @@ export default function EditorToolbar({
       <div className="w-px h-4 bg-border shrink-0 mx-1" />
       <div className="flex-1" />
 
-      {/* Collaborator badge */}
       {collaboratorCount > 0 && (
         <span className="text-xs text-muted font-sans bg-badge py-0.5 px-2 rounded-full border border-border">
           {collaboratorCount} collaborating
         </span>
       )}
 
-      {/* Export dropdown */}
       <div className="relative">
         <button
           onClick={onToggleExport}
@@ -112,7 +106,6 @@ export default function EditorToolbar({
         )}
       </div>
 
-      {/* Save button */}
       <button
         onClick={onSave}
         disabled={saving}

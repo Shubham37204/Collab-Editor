@@ -57,7 +57,6 @@ export default function HowItWorks() {
         </div>
 
         <div className="relative">
-          {/* Connecting Lines (Desktop) */}
           <div className="hidden lg:block absolute top-1/2 left-0 w-full h-0.5 -translate-y-1/2 z-0">
             <div className="w-full h-full border-t-2 border-dashed border-primary/20" />
           </div>
@@ -81,7 +80,7 @@ export default function HowItWorks() {
                   {step.desc}
                 </p>
 
-                {/* Arrow (Mobile/Tablet) */}
+
                 {i < STEPS.length - 1 && (
                   <div className="lg:hidden mt-12 text-primary/30">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="animate-bounce">
@@ -94,7 +93,7 @@ export default function HowItWorks() {
             ))}
           </div>
 
-          {/* Arrows (Desktop) */}
+
           <div className="hidden lg:block">
             <div className="absolute top-1/2 left-1/3 -translate-x-1/2 -translate-y-1/2 text-primary/30">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">

@@ -8,7 +8,6 @@ export default function SocialProof() {
           Loved by developers worldwide
         </p>
         <div className="flex flex-wrap justify-center items-center gap-12 md:gap-20 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-          {/* Using text-based logos/placeholders for speed and reliability */}
           <div className="text-xl font-black font-sans tracking-tighter">GITHUB</div>
           <div className="text-xl font-black font-sans tracking-tighter">VERCEL</div>
           <div className="text-xl font-black font-sans tracking-tighter">CONVEX</div>

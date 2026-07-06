@@ -4,7 +4,7 @@ import remarkGfm from 'remark-gfm'
 import rehypeSlug from 'rehype-slug'
 import { forwardRef } from 'react'
 
-/* Split preview (side-by-side with editor) */
+
 export const SplitPreview = forwardRef(function SplitPreview({ content }, ref) {
   return (
     <div
@@ -18,7 +18,7 @@ export const SplitPreview = forwardRef(function SplitPreview({ content }, ref) {
   )
 })
 
-/* Full-screen preview (focus mode) */
+
 export function FullPreview({ content }) {
   return (
     <div className="flex-1 overflow-auto bg-background">

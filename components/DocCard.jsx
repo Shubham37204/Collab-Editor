@@ -23,10 +23,7 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
       className="glass-panel group relative flex flex-col justify-between rounded-2xl p-6 cursor-pointer transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] min-h-[160px] overflow-hidden"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none" />
-
-      {/* Top Section */}
       <div className="flex items-start justify-between relative z-10">
-        {/* Doc icon */}
         <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
           <svg width="18" height="20" viewBox="0 0 16 18" fill="none">
             <rect x="1" y="1" width="10" height="14" rx="2"
@@ -36,7 +33,6 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
           </svg>
         </div>
 
-        {/* Hover actions */}
         <div
           className="flex gap-1.5 items-center opacity-0 group-hover:opacity-100 transition-opacity duration-200"
           onClick={(e) => e.stopPropagation()}
@@ -65,7 +61,6 @@ export default function DocCard({ doc, onClick, onDelete, onStar, onShare }) {
         </div>
       </div>
 
-      {/* Bottom Section */}
       <div className="mt-8 relative z-10">
         <div className="flex items-center gap-2 mb-2">
           <h3 className="font-sans text-lg font-bold text-foreground tracking-tight m-0 truncate">
