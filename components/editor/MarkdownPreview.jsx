@@ -9,7 +9,7 @@ export const SplitPreview = forwardRef(function SplitPreview({ content }, ref) {
   return (
     <div
       ref={ref}
-      className="preview-content flex-1 px-12 py-8 border-l border-border overflow-auto text-foreground bg-card font-serif leading-[1.85] text-[15px]"
+      className="preview-content flex-1 px-12 pt-20 md:pt-24 pb-8 border-l border-border overflow-auto text-foreground bg-card font-serif leading-[1.85] text-[15px]"
     >
       <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeSlug]}>
         {content}
