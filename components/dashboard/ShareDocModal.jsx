@@ -7,17 +7,30 @@ export default function ShareDocModal({
   onClose,
   doc,
   onShare,
+  onUpdateRole,
+  onRemoveCollaborator,
+  onTogglePublic,
 }) {
   const { user } = useUser()
   const [email, setEmail] = useState('')
   const [role, setRole] = useState('editor')
+  const [error, setError] = useState('')
 
   if (!open || !doc) return null
 
-  const handleInvite = () => {
+  const shareUrl = typeof window !== 'undefined' && doc?._id
+    ? `${window.location.origin}/editor/${doc._id}`
+    : ''
+
+  const handleInvite = async () => {
     if (!email.trim()) return
-    onShare(email, role)
-    setEmail('')
+    setError('')
+    try {
+      await onShare(email, role)
+      setEmail('')
+    } catch (err) {
+      setError(err.message || 'Unable to invite collaborator')
+    }
   }
 
   return (
@@ -49,6 +62,42 @@ export default function ShareDocModal({
         </div>
 
         {/* Invite row */}
+        <div className="my-6 rounded-xl border border-border/50 bg-background/60 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-sm font-sans font-bold text-foreground m-0">Public link</p>
+              <p className="text-xs font-sans text-muted m-0">
+                {doc.isPublic ? 'Anyone with the link can view this document.' : 'Only invited collaborators can open it.'}
+              </p>
+            </div>
+            <button
+              onClick={() => onTogglePublic?.(!doc.isPublic)}
+              className={`border rounded-full px-3 py-1.5 text-xs font-sans font-bold cursor-pointer ${
+                doc.isPublic
+                  ? 'bg-primary text-white border-primary'
+                  : 'bg-badge text-muted border-border'
+              }`}
+            >
+              {doc.isPublic ? 'Public' : 'Private'}
+            </button>
+          </div>
+          {doc.isPublic && (
+            <div className="mt-3 flex gap-2">
+              <input
+                value={shareUrl}
+                readOnly
+                className="flex-1 py-2 px-3 rounded-lg border border-border/50 bg-background text-muted font-sans text-xs outline-none"
+              />
+              <button
+                onClick={() => navigator.clipboard?.writeText(shareUrl)}
+                className="bg-badge border border-border text-foreground rounded-lg px-3 text-xs font-sans cursor-pointer hover:bg-surface"
+              >
+                Copy
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="flex gap-2 my-6">
           <input
             value={email}
@@ -72,6 +121,7 @@ export default function ShareDocModal({
             <span className="relative z-10">Invite</span>
           </button>
         </div>
+        {error && <p className="text-xs text-danger font-sans -mt-4 mb-4">{error}</p>}
 
         {/* Collaborator list */}
         <div className="border-t border-border/50 pt-5">
@@ -107,9 +157,22 @@ export default function ShareDocModal({
                   <p className="text-xs font-sans text-muted m-0">{c.email}</p>
                 </div>
               </div>
-              <span className="text-[10px] py-1 px-3 rounded-full bg-primary/10 text-primary font-sans font-bold tracking-wider uppercase border border-primary/20">
-                {c.role === 'editor' ? 'Can edit' : 'Can view'}
-              </span>
+              <div className="flex items-center gap-2">
+                <select
+                  value={c.role}
+                  onChange={(e) => onUpdateRole?.(c.email, e.target.value)}
+                  className="bg-background border border-border/50 text-foreground font-sans text-[10px] rounded-lg px-2 py-1 cursor-pointer outline-none"
+                >
+                  <option value="editor">Can edit</option>
+                  <option value="viewer">Can view</option>
+                </select>
+                <button
+                  onClick={() => onRemoveCollaborator?.(c.email)}
+                  className="bg-transparent border border-danger/30 text-danger rounded-lg px-2 py-1 text-[10px] font-sans cursor-pointer hover:bg-danger/10"
+                >
+                  Remove
+                </button>
+              </div>
             </div>
           ))}
         </div>

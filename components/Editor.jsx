@@ -6,6 +6,8 @@ import { api } from "../convex/_generated/api";
 import { useTheme } from "../app/layout";
 import { useOthers, useRoom } from "../liveblocks.config";
 import VersionPanel from "./VersionPanel";
+import CommentsPanel from "./CommentsPanel";
+import ActivityPanel from "./ActivityPanel";
 import ShortcutsModal from "./ShortcutsModal";
 import TableOfContents from "./TableOfContents";
 import UnifiedHeader from "./editor/UnifiedHeader";
@@ -25,6 +27,7 @@ import { yCollab } from "y-codemirror.next";
 
 export default function Editor({
   docId,
+  doc,
   initialContent,
   title: initialTitle,
   user,
@@ -48,6 +51,8 @@ export default function Editor({
   const [saving, setSaving] = useState(false);
   const [preview, setPreview] = useState(false);
   const [showVersions, setShowVersions] = useState(false);
+  const [showComments, setShowComments] = useState(false);
+  const [showActivity, setShowActivity] = useState(false);
   const [focusMode, setFocusMode] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [slashMenu, setSlashMenu] = useState(null);
@@ -55,11 +60,16 @@ export default function Editor({
   const [showShortcuts, setShowShortcuts] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState("connected");
   const [showShare, setShowShare] = useState(false);
+  const [selectedText, setSelectedText] = useState("");
+  const [lastError, setLastError] = useState("");
 
   const saveContent = useMutation(api.documents.updateContent);
   const saveTitle = useMutation(api.documents.updateTitle);
   const saveVersion = useMutation(api.documents.saveVersion);
   const addCollab = useMutation(api.documents.addCollaborator);
+  const updateCollabRole = useMutation(api.documents.updateCollaboratorRole);
+  const removeCollab = useMutation(api.documents.removeCollaborator);
+  const togglePublicAccess = useMutation(api.documents.togglePublicAccess);
 
   /* ── Debounced auto-save ── */
   const debouncedSave = useCallback(
@@ -69,45 +79,93 @@ export default function Editor({
       saveTimerRef.current = setTimeout(async () => {
         const sizeKB = new Blob([value]).size / 1024;
         if (sizeKB > 900) {
-          console.warn(`Content too large: ${Math.round(sizeKB)}KB`);
+          setLastError(`Content too large: ${Math.round(sizeKB)}KB`);
           setSaving(false);
           return;
         }
-        await saveContent({ id: docId, content: value });
-        setSaving(false);
+        try {
+          await saveContent({ id: docId, content: value });
+          setLastError("");
+        } catch (err) {
+          setLastError(err.message || "Auto-save failed");
+        } finally {
+          setSaving(false);
+        }
       }, 1000);
     },
-    [docId, saveContent],
+    [docId, saveContent, user],
   );
 
   const handleManualSave = async () => {
     setSaving(true);
-    await Promise.all([
-      saveContent({ id: docId, content }),
-      saveTitle({ id: docId, title }),
-      saveVersion({
-        docId,
-        content,
-        title,
-        savedBy: user?.id || "unknown",
-        savedByName: "Me",
-      }),
-    ]);
-    setSaving(false);
+    setLastError("");
+    try {
+      await Promise.all([
+        saveContent({ id: docId, content }),
+        saveTitle({ id: docId, title }),
+        saveVersion({
+          docId,
+          content,
+          title,
+          savedBy: user?.id || "unknown",
+          savedByName: user?.fullName || user?.firstName || "Me",
+        }),
+      ]);
+    } catch (err) {
+      setLastError(err.message || "Save failed");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSaveNamedVersion = async (label, note) => {
+    await saveVersion({
+      docId,
+      content,
+      title,
+      savedBy: user?.id || "unknown",
+      savedByName: user?.fullName || user?.firstName || "Me",
+      label: label || undefined,
+      note: note || undefined,
+    });
   };
 
 
   const handleFormat = (syntax, block = false) => {
     const view = editorViewRef.current;
     if (!view) return;
-    const { from, to } = view.state.selection.main;
-    if (from === to) return; 
-
+    const selection = view.state.selection.main;
+    const { from, to } = selection;
     const selected = view.state.doc.sliceString(from, to);
-    const insert = block
-      ? `${syntax}${selected}`
-      : `${syntax}${selected}${syntax}`;
-    view.dispatch({ changes: { from, to, insert } });
+
+    if (block) {
+      const line = view.state.doc.lineAt(selection.head);
+      const currentLine = line.text.replace(/^(#{1,6}\s+|>\s+|[-*]\s+)/, "");
+      const insert = `${syntax}${selected || currentLine || "Heading"}`;
+      view.dispatch({
+        changes: {
+          from: selected ? from : line.from,
+          to: selected ? to : line.to,
+          insert,
+        },
+        selection: { anchor: (selected ? from : line.from) + insert.length },
+      });
+      view.focus();
+      return;
+    }
+
+    const fallbackText = syntax === "`" ? "code" : "text";
+    const contentToWrap = selected || fallbackText;
+    const insert = `${syntax}${contentToWrap}${syntax}`;
+    const cursorStart = from + syntax.length;
+    const cursorEnd = cursorStart + contentToWrap.length;
+
+    view.dispatch({
+      changes: { from, to, insert },
+      selection: selected
+        ? { anchor: from + insert.length }
+        : { anchor: cursorStart, head: cursorEnd },
+    });
     view.focus();
   };
 
@@ -118,8 +176,14 @@ export default function Editor({
     clearTimeout(titleTimerRef.current);
     setSaving(true); 
     titleTimerRef.current = setTimeout(async () => {
-      await saveTitle({ id: docId, title: value });
-      setSaving(false);
+      try {
+        await saveTitle({ id: docId, title: value });
+        setLastError("");
+      } catch (err) {
+        setLastError(err.message || "Title save failed");
+      } finally {
+        setSaving(false);
+      }
     }, 400); 
   };
 
@@ -149,6 +213,34 @@ export default function Editor({
       email,
       name: email,
       role,
+    });
+  };
+
+  const handleUpdateRole = async (email, role) => {
+    await updateCollabRole({
+      docId,
+      email,
+      role,
+      actorId: user?.id,
+      actorName: user?.fullName || user?.firstName || "Unknown",
+    });
+  };
+
+  const handleRemoveCollaborator = async (email) => {
+    await removeCollab({
+      docId,
+      email,
+      actorId: user?.id,
+      actorName: user?.fullName || user?.firstName || "Unknown",
+    });
+  };
+
+  const handleTogglePublic = async (isPublic) => {
+    await togglePublicAccess({
+      docId,
+      isPublic,
+      actorId: user?.id,
+      actorName: user?.fullName || user?.firstName || "Unknown",
     });
   };
 
@@ -282,6 +374,9 @@ export default function Editor({
             debouncedSave(value);
           }
           const selection = update.state.selection.main;
+          if (!selection.empty) {
+            setSelectedText(update.state.doc.sliceString(selection.from, selection.to).slice(0, 500));
+          }
           const line = update.state.doc.lineAt(selection.head);
           if (line.text.startsWith("/")) {
             const coords = update.view.coordsAtPos(selection.head);
@@ -309,7 +404,7 @@ export default function Editor({
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
 
   return (
-    <div className="h-screen bg-background flex flex-col overflow-hidden text-foreground">
+    <div className="h-screen editor-page-surface flex flex-col overflow-hidden text-foreground">
       <UnifiedHeader
         title={title}
         onTitleChange={handleTitleChange}
@@ -320,6 +415,10 @@ export default function Editor({
         onToggleFocusMode={() => setFocusMode(true)}
         showVersions={showVersions}
         onToggleVersions={() => setShowVersions((v) => !v)}
+        showComments={showComments}
+        onToggleComments={() => setShowComments((v) => !v)}
+        showActivity={showActivity}
+        onToggleActivity={() => setShowActivity((v) => !v)}
         showExport={showExport}
         onToggleExport={() => setShowExport((v) => !v)}
         onExportMD={handleExportMD}
@@ -338,12 +437,12 @@ export default function Editor({
 
         <div
           ref={editorContainerRef}
-          className={`flex-1 overflow-auto text-sm flex flex-col pt-32 pb-24 ${
+          className={`flex-1 overflow-auto text-sm flex flex-col ${
             preview ? 'hidden' : ''
           } ${
             focusMode
-              ? 'max-w-[740px] mx-auto w-full px-12 md:px-16'
-              : 'max-w-5xl mx-auto w-full px-10 md:px-16'
+              ? 'editor-canvas editor-canvas-focus'
+              : 'editor-canvas'
           }`}
         />
 
@@ -357,6 +456,7 @@ export default function Editor({
           <VersionPanel
             docId={docId}
             currentContent={content}
+            onSaveNamedVersion={handleSaveNamedVersion}
             onRestore={(restoredContent) => {
               setContent(restoredContent);
               const ydoc = ydocRef.current;
@@ -370,6 +470,22 @@ export default function Editor({
               setShowVersions(false);
             }}
             onClose={() => setShowVersions(false)}
+          />
+        )}
+
+        {showComments && (
+          <CommentsPanel
+            docId={docId}
+            user={user}
+            selectedText={selectedText}
+            onClose={() => setShowComments(false)}
+          />
+        )}
+
+        {showActivity && (
+          <ActivityPanel
+            docId={docId}
+            onClose={() => setShowActivity(false)}
           />
         )}
       </div>
@@ -397,6 +513,8 @@ export default function Editor({
           wordCount={wordCount}
           onShowShortcuts={() => setShowShortcuts(true)}
           connectionStatus={connectionStatus}
+          onlineCount={(others?.length || 0) + 1}
+          lastError={lastError}
         />
       )}
 
@@ -409,9 +527,12 @@ export default function Editor({
       <ShareDocModal
         open={showShare}
         onClose={() => setShowShare(false)}
-        doc={{ _id: docId, title: title, collaborators: [] }}
+        doc={doc || { _id: docId, title: title, collaborators: [], isPublic: false }}
         user={user}
         onShare={handleShare}
+        onUpdateRole={handleUpdateRole}
+        onRemoveCollaborator={handleRemoveCollaborator}
+        onTogglePublic={handleTogglePublic}
       />
 
       {/* Invisible print container for PDF export */}

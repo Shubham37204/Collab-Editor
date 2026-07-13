@@ -4,12 +4,19 @@ import { UserButton } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 
 const FORMAT_BUTTONS = [
-  { label: 'B', val: '**', block: false, title: 'Bold' },
-  { label: 'I', val: '_', block: false, title: 'Italic' },
-  { label: 'H1', val: '# ', block: true, title: 'Heading 1' },
-  { label: 'H2', val: '## ', block: true, title: 'Heading 2' },
-  { label: '</>', val: '`', block: false, title: 'Inline code' },
+  { label: 'B', val: '**', block: false, title: 'Bold', className: 'font-black' },
+  { label: 'I', val: '_', block: false, title: 'Italic', className: 'italic font-semibold' },
+  { label: 'H1', val: '# ', block: true, title: 'Heading 1', className: 'font-black' },
+  { label: 'H2', val: '## ', block: true, title: 'Heading 2', className: 'font-bold' },
+  { label: '</>', val: '`', block: false, title: 'Inline code', className: 'font-mono font-bold' },
 ]
+
+const panelButtonClass = (active) =>
+  `border-none rounded-lg px-3 py-1.5 text-[11px] font-sans font-semibold cursor-pointer transition-all duration-150 ${
+    active
+      ? 'bg-primary text-white shadow-sm'
+      : 'bg-transparent text-muted hover:bg-background hover:text-foreground'
+  }`
 
 export default function UnifiedHeader({
   title,
@@ -21,6 +28,10 @@ export default function UnifiedHeader({
   onToggleFocusMode,
   showVersions,
   onToggleVersions,
+  showComments,
+  onToggleComments,
+  showActivity,
+  onToggleActivity,
   showExport,
   onToggleExport,
   onExportMD,
@@ -37,11 +48,11 @@ export default function UnifiedHeader({
   if (focusMode) return null;
 
   return (
-    <div className="fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-[100] glass-panel rounded-2xl md:rounded-full px-3 md:px-4 py-2 flex items-center justify-between gap-2 md:gap-4 shadow-[0_8px_32px_rgba(0,0,0,0.5)] w-[95%] max-w-4xl border border-white/10 backdrop-blur-xl transition-all duration-300">
-      <div className="flex items-center gap-1 md:gap-2 flex-1 min-w-0">
+    <div className="editor-header fixed top-4 md:top-6 left-1/2 -translate-x-1/2 z-[100] rounded-2xl px-3 py-2 flex items-center justify-between gap-3 w-[95%] max-w-5xl transition-all duration-300">
+      <div className="flex items-center gap-2 flex-1 min-w-0">
         <button
           onClick={() => router.push('/dashboard')}
-          className="w-7 h-7 md:w-8 md:h-8 flex items-center justify-center rounded-full hover:bg-white/10 text-muted hover:text-foreground transition-colors cursor-pointer shrink-0"
+          className="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-badge text-muted hover:text-foreground transition-colors cursor-pointer shrink-0"
           title="Back to Dashboard"
         >
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -54,52 +65,58 @@ export default function UnifiedHeader({
           onChange={(e) => onTitleChange(e.target.value)}
           placeholder="Untitled"
           readOnly={isReadOnly}
-          className={`text-xs md:text-sm font-sans font-medium bg-transparent border-none outline-none text-foreground tracking-tight w-full max-w-[80px] md:max-w-[150px] placeholder:text-muted/50 ${isReadOnly ? 'cursor-default' : ''}`}
+          className={`text-sm md:text-base font-sans font-semibold bg-transparent border-none outline-none text-foreground tracking-tight w-full max-w-[110px] md:max-w-[190px] placeholder:text-muted/50 ${isReadOnly ? 'cursor-default' : ''}`}
         />
         {isReadOnly ? (
           <span className="text-[9px] md:text-[10px] font-sans font-bold tracking-wide uppercase px-2 py-0.5 rounded-full bg-white/5 text-muted border border-white/10 ml-2">
             View Only
           </span>
         ) : (
-          <span className={`text-[9px] md:text-[10px] font-sans font-medium tracking-wide uppercase whitespace-nowrap ml-1 md:ml-2 ${saving ? 'text-primary animate-pulse' : 'text-muted'}`}>
+          <span className={`text-[10px] font-sans font-bold tracking-wide uppercase whitespace-nowrap rounded-full px-2 py-1 ${saving ? 'bg-primary/10 text-primary animate-pulse' : 'bg-success/10 text-muted'}`}>
             {saving ? "..." : "Saved"}
           </span>
         )}
       </div>
 
       {!isReadOnly && (
-        <div className="hidden lg:flex items-center justify-center shrink-0 px-2">
-          <div className="flex items-center gap-1 bg-black/20 p-1 rounded-full border border-white/5 shadow-inner">
+        <div className="hidden lg:flex items-center justify-center shrink-0 gap-2">
+          <div className="editor-control-group">
             {FORMAT_BUTTONS.map((btn) => (
               <button
                 key={btn.label}
                 title={btn.title}
                 onClick={() => onFormat(btn.val, btn.block)}
-                className="bg-transparent border-none rounded-full min-w-[32px] h-8 px-2 flex items-center justify-center text-sm font-sans font-bold text-muted cursor-pointer hover:bg-white/10 hover:text-foreground transition-all duration-150"
+                className={`editor-tool-button ${btn.className}`}
               >
                 {btn.label}
               </button>
             ))}
-            <div className="w-px h-4 bg-white/10 mx-1" />
+          </div>
+
+          <div className="editor-control-group">
             <button
               onClick={onTogglePreview}
-              className={`border-none rounded-full px-3 py-1 text-[11px] font-sans font-medium cursor-pointer transition-all duration-150 ${
-                preview
-                  ? 'bg-primary text-white shadow-[0_0_10px_rgba(249,115,22,0.5)]'
-                  : 'bg-transparent text-muted hover:bg-white/10 hover:text-foreground'
-              }`}
+              className={panelButtonClass(preview)}
             >
               {preview ? 'Write' : 'Preview'}
             </button>
             <button
               onClick={onToggleVersions}
-              className={`border-none rounded-full px-3 py-1 text-[11px] font-sans font-medium cursor-pointer transition-all duration-150 ${
-                showVersions
-                  ? 'bg-primary text-white shadow-[0_0_10px_rgba(249,115,22,0.5)]'
-                  : 'bg-transparent text-muted hover:bg-white/10 hover:text-foreground'
-              }`}
+              className={panelButtonClass(showVersions)}
             >
               History
+            </button>
+            <button
+              onClick={onToggleComments}
+              className={panelButtonClass(showComments)}
+            >
+              Comments
+            </button>
+            <button
+              onClick={onToggleActivity}
+              className={panelButtonClass(showActivity)}
+            >
+              Activity
             </button>
           </div>
         </div>
@@ -110,12 +127,12 @@ export default function UnifiedHeader({
           {collaborators}
         </div>
 
-        <div className="h-4 w-px bg-white/10 shrink-0 hidden md:block" />
+        <div className="h-5 w-px bg-border shrink-0 hidden md:block" />
 
         <div className="relative">
           <button
             onClick={onToggleExport}
-            className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-full text-muted cursor-pointer hover:bg-white/10 hover:text-foreground transition-all duration-150"
+            className="w-9 h-9 flex items-center justify-center bg-transparent border-none rounded-xl text-muted cursor-pointer hover:bg-badge hover:text-foreground transition-all duration-150"
             title="Export"
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -145,17 +162,17 @@ export default function UnifiedHeader({
         {!isReadOnly && (
           <button
             onClick={onShare}
-            className="bg-primary text-white border-none rounded-full px-3 md:px-4 py-1.5 text-[10px] md:text-xs font-sans font-bold cursor-pointer hover:bg-primary-hover transition-all duration-200 shadow-lg shadow-primary/20"
+            className="bg-primary text-white border-none rounded-xl px-4 py-2 text-xs font-sans font-bold cursor-pointer hover:bg-primary-hover transition-all duration-200 shadow-lg shadow-primary/20"
           >
             Share
           </button>
         )}
 
-        <div className="h-4 w-px bg-white/10 shrink-0 hidden sm:block" />
+        <div className="h-5 w-px bg-border shrink-0 hidden sm:block" />
         
         <button
           onClick={() => setDark(!dark)}
-          className="w-8 h-8 flex items-center justify-center bg-transparent border-none rounded-full text-muted hover:bg-white/10 hover:text-foreground cursor-pointer transition-colors hidden sm:flex"
+          className="w-9 h-9 flex items-center justify-center bg-transparent border-none rounded-xl text-muted hover:bg-badge hover:text-foreground cursor-pointer transition-colors hidden sm:flex"
           title="Toggle Theme"
         >
           {dark ? (

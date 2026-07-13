@@ -23,10 +23,8 @@ export default function RootLayout({ children }) {
 
   useEffect(() => {
     const saved = localStorage.getItem('collabdocs-theme')
-    window.requestAnimationFrame(() => {
-      if (saved === 'dark') setDark(true)
-      setMounted(true)
-    })
+    if (saved === 'dark') setDark(true)
+    setMounted(true)
   }, [])
 
 

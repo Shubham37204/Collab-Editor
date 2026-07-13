@@ -70,7 +70,6 @@ export default function EditorPage() {
         {() => (
           <Editor
             docId={id}
-            doc={doc}
             initialContent={doc.content}
             title={doc.title}
             user={user}

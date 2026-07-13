@@ -15,6 +15,9 @@ export default defineSchema({
     })),
     isPublic: v.boolean(),
     starred: v.boolean(),
+    updatedAt: v.optional(v.number()),
+    lastEditedBy: v.optional(v.string()),
+    lastEditedByName: v.optional(v.string()),
   })
     .index('by_owner', ['ownerId'])
     .index('by_public', ['isPublic']),
@@ -35,6 +38,31 @@ export default defineSchema({
     title: v.string(),
     savedBy: v.string(),
     savedByName: v.string(),
+    label: v.optional(v.string()),
+    note: v.optional(v.string()),
+    wordCount: v.optional(v.number()),
+  })
+    .index('by_doc', ['docId']),
+
+  comments: defineTable({
+    docId: v.string(),
+    body: v.string(),
+    selectedText: v.optional(v.string()),
+    authorId: v.string(),
+    authorName: v.string(),
+    resolved: v.boolean(),
+    mentions: v.array(v.string()),
+    createdAt: v.number(),
+  })
+    .index('by_doc', ['docId']),
+
+  activities: defineTable({
+    docId: v.string(),
+    type: v.string(),
+    message: v.string(),
+    actorId: v.string(),
+    actorName: v.string(),
+    createdAt: v.number(),
   })
     .index('by_doc', ['docId']),
 })

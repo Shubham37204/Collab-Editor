@@ -30,9 +30,6 @@ export default function DashboardPage() {
   const [showModal, setShowModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState("all");
-  const [error, setError] = useState("");
-  const [recentCutoff] = useState(() => Date.now() - 1000 * 60 * 60 * 24 * 7);
   const [showShare, setShowShare] = useState(false);
   const [shareDocId, setShareDocId] = useState(null);
 
@@ -48,9 +45,6 @@ export default function DashboardPage() {
   const toggleStar = useMutation(api.documents.toggleStar);
   const markAllRead = useMutation(api.notifications.markAllRead);
   const addCollab = useMutation(api.documents.addCollaborator);
-  const updateCollabRole = useMutation(api.documents.updateCollaboratorRole);
-  const removeCollab = useMutation(api.documents.removeCollaborator);
-  const togglePublicAccess = useMutation(api.documents.togglePublicAccess);
 
   useEffect(() => {
     if (isLoaded && !isSignedIn) router.push("/");
@@ -59,40 +53,20 @@ export default function DashboardPage() {
 
   const handleCreateDoc = async (title, templateContent) => {
     setCreating(true);
-    setError("");
-    try {
-      const docTitle = title.trim() || "Untitled Document";
-      const docId = await createDoc({
-        title: docTitle,
-        ownerId: user.id,
-        ownerName: user.fullName || user.firstName || "Unknown",
-        content: templateContent || "",
-      });
-      setShowModal(false);
-      router.push(`/editor/${docId}`);
-    } catch (err) {
-      setError(err.message || "Unable to create document");
-    } finally {
-      setCreating(false);
-    }
+    const docTitle = title.trim() || "Untitled Document";
+    const docId = await createDoc({
+      title: docTitle,
+      ownerId: user.id,
+      ownerName: user.fullName,
+      content: templateContent || "",
+    });
+    setShowModal(false);
+    setCreating(false);
+    router.push(`/editor/${docId}`);
   };
 
-  const handleDelete = async (docId) => {
-    setError("");
-    try {
-      await deleteDoc({ id: docId });
-    } catch (err) {
-      setError(err.message || "Unable to delete document");
-    }
-  };
-  const handleToggleStar = async (docId) => {
-    setError("");
-    try {
-      await toggleStar({ id: docId });
-    } catch (err) {
-      setError(err.message || "Unable to update starred state");
-    }
-  };
+  const handleDelete = async (docId) => await deleteDoc({ id: docId });
+  const handleToggleStar = async (docId) => await toggleStar({ id: docId });
 
   const handleShare = async (email, role) => {
     if (!email.trim()) return;
@@ -105,67 +79,15 @@ export default function DashboardPage() {
     });
   };
 
-  const handleUpdateRole = async (email, role) => {
-    await updateCollabRole({
-      docId: shareDocId,
-      email,
-      role,
-      actorId: user.id,
-      actorName: user.fullName || user.firstName || "Unknown",
-    });
-  };
-
-  const handleRemoveCollaborator = async (email) => {
-    await removeCollab({
-      docId: shareDocId,
-      email,
-      actorId: user.id,
-      actorName: user.fullName || user.firstName || "Unknown",
-    });
-  };
-
-  const handleTogglePublic = async (isPublic) => {
-    await togglePublicAccess({
-      docId: shareDocId,
-      isPublic,
-      actorId: user.id,
-      actorName: user.fullName || user.firstName || "Unknown",
-    });
-  };
-
   const handleMarkAllRead = () => {
-    if (user?.id) {
-      markAllRead({
-        userId: user.id,
-      });
-    }
+    if (user?.id) markAllRead({ userId: user.id });
   };
 
 
-  const normalizedSearch = search.trim().toLowerCase();
   const filteredDocs =
     docs
-      ?.filter((d) => {
-        const isOwned = d.ownerId === user?.id;
-        const isShared = !isOwned;
-        const updatedAt = d.updatedAt || d._creationTime;
-        const isRecent = updatedAt >= recentCutoff;
-        if (filter === "owned" && !isOwned) return false;
-        if (filter === "shared" && !isShared) return false;
-        if (filter === "starred" && !d.starred) return false;
-        if (filter === "recent" && !isRecent) return false;
-        if (!normalizedSearch) return true;
-        return [
-          d.title,
-          d.content,
-          d.ownerName,
-          ...(d.collaborators || []).map((c) => `${c.name} ${c.email}`),
-        ].some((value) => value?.toLowerCase().includes(normalizedSearch));
-      })
-      .sort((a, b) => {
-        if (a.starred !== b.starred) return b.starred ? 1 : -1;
-        return (b.updatedAt || b._creationTime) - (a.updatedAt || a._creationTime);
-      }) ?? [];
+      ?.filter((d) => d.title.toLowerCase().includes(search.toLowerCase()))
+      .sort((a, b) => (b.starred ? 1 : 0) - (a.starred ? 1 : 0)) ?? [];
 
   const unreadCount = notifications?.filter((n) => !n.read).length ?? 0;
   const shareDoc = docs?.find((d) => d._id === shareDocId);
@@ -186,15 +108,13 @@ export default function DashboardPage() {
         user={user}
         search={search}
         onSearchChange={setSearch}
-        filter={filter}
-        onFilterChange={setFilter}
         notifications={notifications}
         unreadCount={unreadCount}
         onMarkAllRead={handleMarkAllRead}
       />
 
 
-      <main className="flex-1 max-w-6xl mx-auto px-8 pt-16 pb-14 relative z-10 w-full">
+      <main className="flex-1 max-w-6xl mx-auto px-8 py-14 relative z-10 w-full">
         <div className="absolute top-0 right-1/4 w-[500px] h-[500px] bg-primary/10 blur-[120px] rounded-full -z-10 pointer-events-none" />
         {/* Title row */}
         <div className="flex items-baseline justify-between mb-10">
@@ -208,12 +128,6 @@ export default function DashboardPage() {
             </button>
           )}
         </div>
-
-        {error && (
-          <div className="mb-6 rounded-lg border border-danger/30 bg-danger/10 px-4 py-3 text-sm text-danger font-sans">
-            {error}
-          </div>
-        )}
 
 
         {docs === undefined ? (
@@ -262,9 +176,6 @@ export default function DashboardPage() {
         doc={shareDoc}
         user={user}
         onShare={handleShare}
-        onUpdateRole={handleUpdateRole}
-        onRemoveCollaborator={handleRemoveCollaborator}
-        onTogglePublic={handleTogglePublic}
       />
 
       <footer className="text-center py-8 border-t border-border/40 text-sm text-muted font-sans mt-auto">

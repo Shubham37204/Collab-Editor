@@ -102,66 +102,6 @@ body {
   padding: 0;
 }
 
-.editor-header {
-  background: color-mix(in srgb, var(--card-color) 88%, transparent);
-  border: 1px solid color-mix(in srgb, var(--fg-color) 10%, transparent);
-  box-shadow: 0 18px 50px rgba(28, 25, 23, 0.16);
-  backdrop-filter: blur(18px);
-  -webkit-backdrop-filter: blur(18px);
-}
-
-.dark .editor-header {
-  background: color-mix(in srgb, var(--card-color) 86%, transparent);
-  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
-}
-
-.editor-control-group {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-  border-radius: 12px;
-  background: var(--bg-secondary-color);
-  border: 1px solid var(--border-color);
-}
-
-.editor-tool-button {
-  min-width: 34px;
-  height: 32px;
-  padding: 0 9px;
-  border: 0;
-  border-radius: 9px;
-  background: transparent;
-  color: var(--muted-color);
-  cursor: pointer;
-  font-size: 13px;
-  line-height: 1;
-}
-
-.editor-tool-button:hover {
-  background: var(--card-color);
-  color: var(--fg-color);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
-}
-
-.editor-page-surface {
-  background:
-    linear-gradient(180deg, color-mix(in srgb, var(--primary-color) 5%, transparent), transparent 260px),
-    var(--bg-color);
-}
-
-.editor-canvas {
-  max-width: 860px;
-  margin: 0 auto;
-  width: 100%;
-  min-height: calc(100vh - 160px);
-  padding: 136px 56px 96px;
-}
-
-.editor-canvas-focus {
-  max-width: 760px;
-}
-
 /* ── Skeleton loading ── */
 .skeleton {
   background: linear-gradient(
@@ -242,8 +182,8 @@ div[id*="branding"] {
 /* ── CodeMirror ── */
 .cm-editor {
   height: 100%;
-  font-size: 16px;
-  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 14px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
 }
 
 .cm-editor.cm-focused {
@@ -252,11 +192,11 @@ div[id*="branding"] {
 
 .cm-scroller {
   padding: 16px 0;
-  font-family: 'Inter', system-ui, sans-serif !important;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace !important;
 }
 
 .cm-line {
-  padding: 0;
+  padding: 0 24px;
 }
 
 .cm-gutters {
