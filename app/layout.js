@@ -56,6 +56,7 @@ export default function RootLayout({ children }) {
             <title>CollabDocs — Real-time Collaborative Editor</title>
             <meta name="description" content="Write together, think together. Real-time collaborative markdown editing with live cursors, AI-powered writing assistance, and version history." />
             <meta name="viewport" content="width=device-width, initial-scale=1" />
+          <link rel="icon" href="/logo.png" type="image/png" />
           </head>
           <body className={`${geist.className} bg-background text-foreground min-h-screen transition-colors duration-300 ease-in-out font-sans`} style={{ margin: 0, padding: 0 }}>
             <ConvexClientProvider>
