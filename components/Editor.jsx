@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMutation } from "convex/react";
 import { api } from "../convex/_generated/api";
 import { useTheme } from "../app/layout";
-import { useOthers, useRoom } from "../liveblocks.config";
+import { useOthers, useRoom, useMyPresence } from "../liveblocks.config";
 import VersionPanel from "./VersionPanel";
 import CommentsPanel from "./CommentsPanel";
 import ActivityPanel from "./ActivityPanel";
@@ -37,6 +37,9 @@ export default function Editor({
   const { dark } = useTheme();
   const room = useRoom();
   const others = useOthers();
+  const [, setMyPresence] = useMyPresence();
+
+  const typingTimerRef = useRef(null);
 
   const editorContainerRef = useRef(null);
   const editorViewRef = useRef(null);
@@ -317,11 +320,18 @@ export default function Editor({
     });
 
     const { awareness } = provider;
-    awareness.setLocalStateField("user", { 
+    const localUser = { 
       name: user?.fullName || user?.firstName || "Anonymous", 
       avatar: user?.imageUrl,
       color: "var(--primary-color)" 
-    });
+    };
+    awareness.setLocalStateField("user", localUser);
+    // Also set Liveblocks presence so `useOthers()` has top-level presence fields
+    try {
+      setMyPresence?.(localUser);
+    } catch (e) {
+      // ignore if not available
+    }
 
     const lightTheme = EditorView.theme({
       "&": { background: "transparent", color: "var(--fg-color)", fontSize: "19px", fontFamily: "'Inter', system-ui, sans-serif" },
@@ -372,6 +382,16 @@ export default function Editor({
             const value = update.state.doc.toString();
             setContent(value);
             debouncedSave(value);
+            // indicate typing to others via Liveblocks presence (debounced)
+            if (setMyPresence) {
+              try {
+                setMyPresence({ isTyping: true });
+                clearTimeout(typingTimerRef.current);
+                typingTimerRef.current = setTimeout(() => {
+                  setMyPresence({ isTyping: false });
+                }, 1500);
+              } catch (e) {}
+            }
           }
           const selection = update.state.selection.main;
           if (!selection.empty) {
@@ -398,6 +418,7 @@ export default function Editor({
       view.destroy();
       provider.destroy();
       ydoc.destroy();
+      clearTimeout(typingTimerRef.current);
     };
   }, [room, dark]);
 
