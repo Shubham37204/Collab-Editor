@@ -26,7 +26,7 @@ export default function ActivityPanel({ docId, onClose }) {
     });
 
   return (
-    <aside className="w-[300px] border-l border-border bg-card flex flex-col shrink-0 h-full">
+    <aside className="relative z-[210] w-[300px] border-l border-border bg-card flex flex-col shrink-0 h-full">
       <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
         <div>
           <h3 className="text-sm font-semibold text-foreground font-sans m-0">Activity</h3>

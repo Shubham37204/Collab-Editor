@@ -43,7 +43,7 @@ export default function VersionPanel({
   };
 
   return (
-    <div className="w-[260px] border-l border-border bg-card flex flex-col shrink-0 h-full">
+    <div className="relative z-[210] w-[260px] border-l border-border bg-card flex flex-col shrink-0 h-full">
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-3.5 border-b border-border">
         <span className="text-sm font-medium text-foreground font-sans">
