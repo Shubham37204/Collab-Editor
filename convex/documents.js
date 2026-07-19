@@ -192,6 +192,16 @@ export const addCollaborator = mutation({
       actorId: args.actorId || "unknown",
       actorName: args.actorName || "Unknown",
     });
+    if (!args.actorId || args.userId !== args.actorId) {
+      await ctx.db.insert("notifications", {
+        userId: args.email.toLowerCase(),
+        message: `${args.actorName || "Someone"} invited you to collaborate`,
+        docId: args.docId,
+        docTitle: doc.title,
+        read: false,
+        fromName: args.actorName || "Unknown",
+      });
+    }
   },
 });
 
@@ -328,7 +338,7 @@ export const addComment = mutation({
     });
     await Promise.all(args.mentions.map((email) =>
       ctx.db.insert("notifications", {
-        userId: email,
+        userId: email.toLowerCase(),
         message: `${args.authorName} mentioned you in a comment`,
         docId: args.docId,
         docTitle: doc?.title || "Document",

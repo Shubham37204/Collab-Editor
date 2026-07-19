@@ -56,6 +56,8 @@ export default function EditorPage() {
     <RoomProvider
       id={`doc-${id}`}
       initialPresence={{ 
+        userId: user?.id,
+        email: user?.emailAddresses?.[0]?.emailAddress?.toLowerCase(),
         name: user?.fullName || user?.firstName || 'Anonymous', 
         avatar: user?.imageUrl,
         cursor: null 

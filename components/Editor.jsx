@@ -216,6 +216,8 @@ export default function Editor({
       email,
       name: email,
       role,
+      actorId: user?.id,
+      actorName: user?.fullName || user?.firstName || "Unknown",
     });
   };
 
@@ -321,6 +323,8 @@ export default function Editor({
 
     const { awareness } = provider;
     const localUser = { 
+      userId: user?.id,
+      email: user?.emailAddresses?.[0]?.emailAddress?.toLowerCase(),
       name: user?.fullName || user?.firstName || "Anonymous", 
       avatar: user?.imageUrl,
       color: "var(--primary-color)" 
@@ -448,7 +452,7 @@ export default function Editor({
         onShare={() => setShowShare(true)}
         saving={saving}
         isReadOnly={isReadOnly}
-        collaborators={<CollaboratorAvatars others={others} />}
+        collaborators={<CollaboratorAvatars others={others} currentUser={user} />}
       />
 
       <div className="flex-1 flex overflow-hidden relative">

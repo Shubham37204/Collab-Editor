@@ -42,6 +42,7 @@ export default function DashboardPage() {
   });
   const notifications = useQuery(api.notifications.getMyNotifications, {
     userId: user?.id ?? "",
+    email: user?.emailAddresses[0]?.emailAddress ?? "",
   });
   const createDoc = useMutation(api.documents.createDoc);
   const deleteDoc = useMutation(api.documents.deleteDoc);
@@ -102,6 +103,8 @@ export default function DashboardPage() {
       email,
       name: email,
       role,
+      actorId: user.id,
+      actorName: user.fullName || user.firstName || "Unknown",
     });
   };
 
@@ -137,6 +140,7 @@ export default function DashboardPage() {
     if (user?.id) {
       markAllRead({
         userId: user.id,
+        email: user.emailAddresses[0]?.emailAddress ?? "",
       });
     }
   };
