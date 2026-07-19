@@ -3,7 +3,6 @@ import { UserButton } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 import { useTheme } from '../../app/layout'
-import NotificationDropdown from './NotificationDropdown'
 
 const FILTER_OPTIONS = [
   { value: 'all', label: 'All' },
@@ -72,9 +71,6 @@ export default function DashboardHeader({
   onSearchChange,
   filter,
   onFilterChange,
-  notifications,
-  unreadCount,
-  onMarkAllRead,
 }) {
   const { dark, setDark } = useTheme()
   const router = useRouter()
@@ -114,14 +110,6 @@ export default function DashboardHeader({
         </div>
 
         <div className="flex items-center justify-end gap-2">
-          <div className="hidden sm:flex">
-            <NotificationDropdown
-              notifications={notifications}
-              unreadCount={unreadCount}
-              onMarkAllRead={onMarkAllRead}
-            />
-          </div>
-
           <button
             type="button"
             onClick={() => setDark(!dark)}

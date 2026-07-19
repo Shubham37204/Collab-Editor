@@ -23,40 +23,36 @@ async function logActivity(ctx, { docId, type, message, actorId, actorName }) {
   });
 }
 
-async function notifyCollaboratorInvite(ctx, { doc, docId, email, actorName }) {
-  const recipient = email.toLowerCase();
-
-  await ctx.db.insert("notifications", {
-    userId: recipient,
-    message: `${actorName || "Someone"} invited you to collaborate`,
-    docId,
-    docTitle: doc.title,
-    read: false,
-    fromName: actorName || "Unknown",
-  });
-}
-
 export const getMyDocs = query({
   args: { ownerId: v.string(), email: v.optional(v.string()) },
   handler: async (ctx, args) => {
-    const allDocs = await ctx.db.query("documents").collect();
-    return allDocs
-      .filter((doc) => 
-        doc.ownerId === args.ownerId || 
-        (doc.collaborators && doc.collaborators.some((c) => 
+    const ownedDocs = await ctx.db
+      .query("documents")
+      .withIndex("by_owner", (q) => q.eq("ownerId", args.ownerId))
+      .collect();
+    const allDocs = args.email
+      ? await ctx.db.query("documents").collect()
+      : [];
+    const sharedDocs = allDocs
+      .filter((doc) =>
+        doc.ownerId !== args.ownerId &&
+        doc.collaborators &&
+        doc.collaborators.some((c) =>
           c.userId === args.ownerId || (args.email && c.email?.toLowerCase() === args.email.toLowerCase())
-        ))
-      )
+        )
+      );
+    return [...ownedDocs, ...sharedDocs]
       .sort((a, b) => b._creationTime - a._creationTime);
   },
 });
 
 
 export const deleteDoc = mutation({
-  args: { id: v.id("documents"), userId: v.optional(v.string()) },
+  args: { id: v.id("documents"), userId: v.string() },
   handler: async (ctx, args) => {
     const doc = await ctx.db.get(args.id);
-    if (args.userId && doc?.ownerId !== args.userId) {
+    if (!doc) throw new Error("Document not found");
+    if (doc.ownerId !== args.userId) {
       throw new Error("Only the owner can delete this document");
     }
     await ctx.db.delete(args.id);
@@ -67,14 +63,14 @@ export const updateTitle = mutation({
   args: {
     id: v.id("documents"),
     title: v.string(),
-    userId: v.optional(v.string()),
+    userId: v.string(),
     userEmail: v.optional(v.string()),
     userName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const doc = await ctx.db.get(args.id);
     if (!doc) throw new Error("Document not found");
-    if (args.userId && !canEdit(doc, args.userId, args.userEmail)) {
+    if (!canEdit(doc, args.userId, args.userEmail)) {
       throw new Error("You do not have permission to rename this document");
     }
     await ctx.db.patch(args.id, {
@@ -97,14 +93,14 @@ export const updateContent = mutation({
   args: {
     id: v.id("documents"),
     content: v.string(),
-    userId: v.optional(v.string()),
+    userId: v.string(),
     userEmail: v.optional(v.string()),
     userName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const doc = await ctx.db.get(args.id);
     if (!doc) throw new Error("Document not found");
-    if (args.userId && !canEdit(doc, args.userId, args.userEmail)) {
+    if (!canEdit(doc, args.userId, args.userEmail)) {
       throw new Error("You do not have permission to edit this document");
     }
     const sizeInBytes = new TextEncoder().encode(args.content).length
@@ -121,10 +117,21 @@ export const updateContent = mutation({
 })
 
 export const toggleStar = mutation({
-  args: { id: v.id("documents") },
+  args: {
+    id: v.id("documents"),
+    userId: v.string(),
+    userEmail: v.optional(v.string()),
+  },
   handler: async (ctx, args) => {
     const doc = await ctx.db.get(args.id);
     if (!doc) throw new Error("Document not found");
+    const canAccess =
+      doc.ownerId === args.userId ||
+      doc.collaborators?.some((c) =>
+        c.userId === args.userId ||
+        (args.userEmail && c.email?.toLowerCase() === args.userEmail.toLowerCase())
+      );
+    if (!canAccess) throw new Error("You do not have permission to star this document");
 
     await ctx.db.patch(args.id, {
       starred: !doc.starred,
@@ -186,12 +193,6 @@ export const addCollaborator = mutation({
       c.userId === args.userId || c.email?.toLowerCase() === args.email.toLowerCase()
     );
     if (already) {
-      await notifyCollaboratorInvite(ctx, {
-        doc,
-        docId: args.docId,
-        email: args.email,
-        actorName: args.actorName,
-      });
       return;
     }
     await ctx.db.patch(args.docId, {
@@ -212,12 +213,6 @@ export const addCollaborator = mutation({
       message: `${args.actorName || "Someone"} invited ${args.email} as ${args.role}`,
       actorId: args.actorId || "unknown",
       actorName: args.actorName || "Unknown",
-    });
-    await notifyCollaboratorInvite(ctx, {
-      doc,
-      docId: args.docId,
-      email: args.email,
-      actorName: args.actorName,
     });
   },
 });
@@ -340,6 +335,10 @@ export const addComment = mutation({
   handler: async (ctx, args) => {
     if (!args.body.trim()) throw new Error("Comment cannot be empty");
     const doc = await ctx.db.get(args.docId);
+    if (!doc) throw new Error("Document not found");
+    if (!canEdit(doc, args.authorId, undefined)) {
+      throw new Error("You do not have permission to comment on this document");
+    }
     await ctx.db.insert("comments", {
       ...args,
       body: args.body.trim(),
@@ -353,16 +352,6 @@ export const addComment = mutation({
       actorId: args.authorId,
       actorName: args.authorName,
     });
-    await Promise.all(args.mentions.map((email) =>
-      ctx.db.insert("notifications", {
-        userId: email.toLowerCase(),
-        message: `${args.authorName} mentioned you in a comment`,
-        docId: args.docId,
-        docTitle: doc?.title || "Document",
-        read: false,
-        fromName: args.authorName,
-      })
-    ));
   },
 });
 

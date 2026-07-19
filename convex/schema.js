@@ -22,16 +22,6 @@ export default defineSchema({
     .index('by_owner', ['ownerId'])
     .index('by_public', ['isPublic']),
 
-  notifications: defineTable({
-    userId: v.string(),       
-    message: v.string(),
-    docId: v.string(),
-    docTitle: v.string(),
-    read: v.boolean(),
-    fromName: v.string(),
-  })
-    .index('by_user', ['userId']),
-
   versions: defineTable({
     docId: v.string(),
     content: v.string(),

@@ -1,5 +1,5 @@
 "use client";
-import { useUser, UserButton } from "@clerk/nextjs";
+import { useUser } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -40,14 +40,9 @@ export default function DashboardPage() {
     ownerId: user?.id ?? "",
     email: user?.emailAddresses[0]?.emailAddress ?? ""
   });
-  const notifications = useQuery(api.notifications.getMyNotifications, {
-    userId: user?.id ?? "",
-    email: user?.emailAddresses[0]?.emailAddress ?? "",
-  });
   const createDoc = useMutation(api.documents.createDoc);
   const deleteDoc = useMutation(api.documents.deleteDoc);
   const toggleStar = useMutation(api.documents.toggleStar);
-  const markAllRead = useMutation(api.notifications.markAllRead);
   const addCollab = useMutation(api.documents.addCollaborator);
   const updateCollabRole = useMutation(api.documents.updateCollaboratorRole);
   const removeCollab = useMutation(api.documents.removeCollaborator);
@@ -81,7 +76,7 @@ export default function DashboardPage() {
   const handleDelete = async (docId) => {
     setError("");
     try {
-      await deleteDoc({ id: docId });
+      await deleteDoc({ id: docId, userId: user.id });
     } catch (err) {
       setError(err.message || "Unable to delete document");
     }
@@ -89,7 +84,11 @@ export default function DashboardPage() {
   const handleToggleStar = async (docId) => {
     setError("");
     try {
-      await toggleStar({ id: docId });
+      await toggleStar({
+        id: docId,
+        userId: user.id,
+        userEmail: user.emailAddresses[0]?.emailAddress ?? "",
+      });
     } catch (err) {
       setError(err.message || "Unable to update starred state");
     }
@@ -136,16 +135,6 @@ export default function DashboardPage() {
     });
   };
 
-  const handleMarkAllRead = () => {
-    if (user?.id) {
-      markAllRead({
-        userId: user.id,
-        email: user.emailAddresses[0]?.emailAddress ?? "",
-      });
-    }
-  };
-
-
   const normalizedSearch = search.trim().toLowerCase();
   const filteredDocs =
     docs
@@ -171,7 +160,6 @@ export default function DashboardPage() {
         return (b.updatedAt || b._creationTime) - (a.updatedAt || a._creationTime);
       }) ?? [];
 
-  const unreadCount = notifications?.filter((n) => !n.read).length ?? 0;
   const shareDoc = docs?.find((d) => d._id === shareDocId);
 
 
@@ -192,9 +180,6 @@ export default function DashboardPage() {
         onSearchChange={setSearch}
         filter={filter}
         onFilterChange={setFilter}
-        notifications={notifications}
-        unreadCount={unreadCount}
-        onMarkAllRead={handleMarkAllRead}
       />
 
 
