@@ -23,9 +23,8 @@ async function logActivity(ctx, { docId, type, message, actorId, actorName }) {
   });
 }
 
-async function notifyCollaboratorInvite(ctx, { doc, docId, email, actorEmail, actorName }) {
+async function notifyCollaboratorInvite(ctx, { doc, docId, email, actorName }) {
   const recipient = email.toLowerCase();
-  if (actorEmail?.toLowerCase() === recipient) return;
 
   await ctx.db.insert("notifications", {
     userId: recipient,
@@ -176,7 +175,6 @@ export const addCollaborator = mutation({
     role: v.union(v.literal("viewer"), v.literal("editor")),
     actorId: v.optional(v.string()),
     actorName: v.optional(v.string()),
-    actorEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const doc = await ctx.db.get(args.docId);
@@ -192,7 +190,6 @@ export const addCollaborator = mutation({
         doc,
         docId: args.docId,
         email: args.email,
-        actorEmail: args.actorEmail,
         actorName: args.actorName,
       });
       return;
@@ -220,7 +217,6 @@ export const addCollaborator = mutation({
       doc,
       docId: args.docId,
       email: args.email,
-      actorEmail: args.actorEmail,
       actorName: args.actorName,
     });
   },

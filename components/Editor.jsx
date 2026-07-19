@@ -232,7 +232,6 @@ export default function Editor({
       role,
       actorId: user?.id,
       actorName: user?.fullName || user?.firstName || "Unknown",
-      actorEmail: user?.emailAddresses?.[0]?.emailAddress ?? "",
     });
   };
 
