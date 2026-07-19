@@ -12,10 +12,10 @@ const FORMAT_BUTTONS = [
 ]
 
 const panelButtonClass = (active) =>
-  `border-none rounded-lg px-3 py-1.5 text-[11px] font-sans font-semibold cursor-pointer transition-all duration-150 ${
+  `border-none rounded-full px-3 py-1.5 text-[12px] md:text-sm font-sans font-semibold cursor-pointer transition-all duration-150 ${
     active
-      ? 'bg-primary text-white shadow-sm'
-      : 'bg-transparent text-muted hover:bg-background hover:text-foreground'
+      ? 'bg-primary text-white shadow-[0_8px_24px_rgba(249,115,22,0.18)]'
+      : 'bg-transparent text-muted hover:bg-primary/5 hover:text-primary'
   }`
 
 export default function UnifiedHeader({
@@ -80,18 +80,7 @@ export default function UnifiedHeader({
 
       {!isReadOnly && (
         <div className="hidden lg:flex items-center justify-center shrink-0 gap-2">
-          <div className="editor-control-group">
-            {FORMAT_BUTTONS.map((btn) => (
-              <button
-                key={btn.label}
-                title={btn.title}
-                onClick={() => onFormat(btn.val, btn.block)}
-                className={`editor-tool-button ${btn.className}`}
-              >
-                {btn.label}
-              </button>
-            ))}
-          </div>
+          {/* Formatting buttons removed from header - use in-editor toolbar instead */}
 
           <div className="editor-control-group">
             <button
@@ -162,7 +151,7 @@ export default function UnifiedHeader({
         {!isReadOnly && (
           <button
             onClick={onShare}
-            className="bg-primary text-white border-none rounded-xl px-4 py-2 text-xs font-sans font-bold cursor-pointer hover:bg-primary-hover transition-all duration-200 shadow-lg shadow-primary/20"
+            className={`bg-primary text-white border-none rounded-full px-4 py-1.5 text-sm font-sans font-bold cursor-pointer hover:bg-primary-hover transition-all duration-200 shadow-lg shadow-primary/20`}
           >
             Share
           </button>
