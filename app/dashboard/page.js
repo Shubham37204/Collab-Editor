@@ -105,6 +105,7 @@ export default function DashboardPage() {
       role,
       actorId: user.id,
       actorName: user.fullName || user.firstName || "Unknown",
+      actorEmail: user.emailAddresses[0]?.emailAddress ?? "",
     });
   };
 

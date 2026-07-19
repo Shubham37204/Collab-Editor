@@ -51,14 +51,21 @@ export default function EditorPage() {
   );
   const role = isOwner ? 'editor' : (collab?.role || 'viewer');
   const isReadOnly = role === 'viewer';
+  const presenceEmail = user?.emailAddresses?.[0]?.emailAddress?.toLowerCase()
+  const presenceName =
+    user?.fullName ||
+    user?.firstName ||
+    user?.username ||
+    presenceEmail?.split('@')[0] ||
+    'Collaborator'
 
   return (
     <RoomProvider
       id={`doc-${id}`}
       initialPresence={{ 
         userId: user?.id,
-        email: user?.emailAddresses?.[0]?.emailAddress?.toLowerCase(),
-        name: user?.fullName || user?.firstName || 'Anonymous', 
+        email: presenceEmail,
+        name: presenceName,
         avatar: user?.imageUrl,
         cursor: null 
       }}

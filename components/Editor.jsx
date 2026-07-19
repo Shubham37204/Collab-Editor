@@ -25,6 +25,19 @@ import * as Y from "yjs";
 import { LiveblocksYjsProvider } from "@liveblocks/yjs";
 import { yCollab } from "y-codemirror.next";
 
+function getUserPresence(user) {
+  const email = user?.emailAddresses?.[0]?.emailAddress?.toLowerCase();
+  const emailName = email?.split("@")[0];
+
+  return {
+    userId: user?.id,
+    email,
+    name: user?.fullName || user?.firstName || user?.username || emailName || "Collaborator",
+    avatar: user?.imageUrl,
+    color: "var(--primary-color)",
+  };
+}
+
 export default function Editor({
   docId,
   doc,
@@ -46,6 +59,7 @@ export default function Editor({
   const saveTimerRef = useRef(null);
   const titleTimerRef = useRef(null);
   const ydocRef = useRef(null);
+  const providerRef = useRef(null);
   const previewPanelRef = useRef(null);
   const seededRef = useRef(false);
 
@@ -218,6 +232,7 @@ export default function Editor({
       role,
       actorId: user?.id,
       actorName: user?.fullName || user?.firstName || "Unknown",
+      actorEmail: user?.emailAddresses?.[0]?.emailAddress ?? "",
     });
   };
 
@@ -300,6 +315,7 @@ export default function Editor({
     const ydoc = new Y.Doc();
     ydocRef.current = ydoc;
     const provider = new LiveblocksYjsProvider(room, ydoc);
+    providerRef.current = provider;
     const ytext = ydoc.getText("document-content");
 
     const tryInsert = () => {
@@ -322,13 +338,7 @@ export default function Editor({
     });
 
     const { awareness } = provider;
-    const localUser = { 
-      userId: user?.id,
-      email: user?.emailAddresses?.[0]?.emailAddress?.toLowerCase(),
-      name: user?.fullName || user?.firstName || "Anonymous", 
-      avatar: user?.imageUrl,
-      color: "var(--primary-color)" 
-    };
+    const localUser = getUserPresence(user);
     awareness.setLocalStateField("user", localUser);
     // Also set Liveblocks presence so `useOthers()` has top-level presence fields
     try {
@@ -421,10 +431,29 @@ export default function Editor({
     return () => {
       view.destroy();
       provider.destroy();
+      providerRef.current = null;
       ydoc.destroy();
       clearTimeout(typingTimerRef.current);
     };
   }, [room, dark]);
+
+  useEffect(() => {
+    const localUser = getUserPresence(user);
+    providerRef.current?.awareness?.setLocalStateField("user", localUser);
+    try {
+      setMyPresence?.(localUser);
+    } catch (e) {
+      // ignore if presence is not available yet
+    }
+  }, [
+    setMyPresence,
+    user?.id,
+    user?.fullName,
+    user?.firstName,
+    user?.username,
+    user?.imageUrl,
+    user?.emailAddresses,
+  ]);
 
   const wordCount = content.trim().split(/\s+/).filter(Boolean).length;
 

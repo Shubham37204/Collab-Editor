@@ -23,6 +23,20 @@ async function logActivity(ctx, { docId, type, message, actorId, actorName }) {
   });
 }
 
+async function notifyCollaboratorInvite(ctx, { doc, docId, email, actorEmail, actorName }) {
+  const recipient = email.toLowerCase();
+  if (actorEmail?.toLowerCase() === recipient) return;
+
+  await ctx.db.insert("notifications", {
+    userId: recipient,
+    message: `${actorName || "Someone"} invited you to collaborate`,
+    docId,
+    docTitle: doc.title,
+    read: false,
+    fromName: actorName || "Unknown",
+  });
+}
+
 export const getMyDocs = query({
   args: { ownerId: v.string(), email: v.optional(v.string()) },
   handler: async (ctx, args) => {
@@ -162,6 +176,7 @@ export const addCollaborator = mutation({
     role: v.union(v.literal("viewer"), v.literal("editor")),
     actorId: v.optional(v.string()),
     actorName: v.optional(v.string()),
+    actorEmail: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const doc = await ctx.db.get(args.docId);
@@ -172,7 +187,16 @@ export const addCollaborator = mutation({
     const already = doc.collaborators.find((c) =>
       c.userId === args.userId || c.email?.toLowerCase() === args.email.toLowerCase()
     );
-    if (already) return;
+    if (already) {
+      await notifyCollaboratorInvite(ctx, {
+        doc,
+        docId: args.docId,
+        email: args.email,
+        actorEmail: args.actorEmail,
+        actorName: args.actorName,
+      });
+      return;
+    }
     await ctx.db.patch(args.docId, {
       collaborators: [
         ...doc.collaborators,
@@ -192,16 +216,13 @@ export const addCollaborator = mutation({
       actorId: args.actorId || "unknown",
       actorName: args.actorName || "Unknown",
     });
-    if (!args.actorId || args.userId !== args.actorId) {
-      await ctx.db.insert("notifications", {
-        userId: args.email.toLowerCase(),
-        message: `${args.actorName || "Someone"} invited you to collaborate`,
-        docId: args.docId,
-        docTitle: doc.title,
-        read: false,
-        fromName: args.actorName || "Unknown",
-      });
-    }
+    await notifyCollaboratorInvite(ctx, {
+      doc,
+      docId: args.docId,
+      email: args.email,
+      actorEmail: args.actorEmail,
+      actorName: args.actorName,
+    });
   },
 });
 
